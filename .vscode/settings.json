@@ -1,0 +1,12 @@
+{
+    "files.readonlyInclude": {
+        "**/.cargo/registry/src/**/*.rs": true,
+        "**/lib/rustlib/src/rust/library/**/*.rs": true,
+    },
+    "files.trimTrailingWhitespace": true,
+    "editor.formatOnSave": true,
+    "editor.pasteAs.preferences": [
+        "markdown.link"
+    ],
+    "workbench.secondarySideBar.defaultVisibility": "hidden",
+}
