@@ -8,10 +8,10 @@ pub fn plugin(app: &mut App) {
 }
 
 fn map_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // commands.spawn(LdtkWorldBundle {
-    // ldtk_handle: asset_server.load("textures/map/tilemap.ldtk").into(),
-    //     ..Default::default()
-    // });
+    commands.spawn(LdtkWorldBundle {
+        ldtk_handle: asset_server.load("textures/map/tilemap.ldtk").into(),
+        ..Default::default()
+    });
 }
 
 fn setup_collision(
