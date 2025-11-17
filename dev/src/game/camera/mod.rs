@@ -24,12 +24,11 @@ fn initialize_camera(mut commands: Commands) {
             ..Default::default()
         },
         Projection::Orthographic(OrthographicProjection {
-            scaling_mode: bevy::render::camera::ScalingMode::FixedVertical {
+            scaling_mode: bevy::camera::ScalingMode::FixedVertical {
                 viewport_height: 160.,
             },
             ..OrthographicProjection::default_2d()
         }),
-        Transform::from_xyz(240.0 / 2.0, 160.0 / 2.0, 0.0),
     ));
 }
 

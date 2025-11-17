@@ -1,11 +1,20 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_tweening::*;
 
 use super::camera::CameraTarget;
-use super::tick::MainTick;
+use super::tick::TICK_DELTA;
 
 const GRID_SIZE: u8 = 16;
+const JITTER_THRESHOLD: f32 = 0.015;
+
+#[derive(Resource)]
+pub struct WalkCycleTimer {
+    pub timer: Timer,
+}
 
 #[derive(Default, Component)]
 struct Player;
@@ -16,14 +25,15 @@ struct Velocity {
 }
 
 pub fn plugin(app: &mut App) {
+    app.add_systems(Startup, init_walk_cycle_timer);
     app.add_systems(
         Update,
         (
             process_player,
-            player_movement_input,
             translate_transform_to_grid_coords,
-            translate_grid_coords_entities,
+            player_movement_input,
             move_player,
+            translate_grid_coords_entities,
         )
             .chain(),
     );
@@ -55,11 +65,21 @@ fn process_player(
     }
 }
 
+fn init_walk_cycle_timer(mut commands: Commands) {
+    commands.insert_resource(WalkCycleTimer {
+        timer: Timer::new(Duration::from_secs_f32(TICK_DELTA), TimerMode::Once),
+    })
+}
+
 fn player_movement_input(
     keys: Res<ButtonInput<KeyCode>>,
     player_velocity: Single<&mut Velocity, With<Player>>,
+    mut walk_cycle_timer: ResMut<WalkCycleTimer>,
+    time: Res<Time>,
 ) {
     let mut velocity = player_velocity.into_inner();
+
+    walk_cycle_timer.timer.tick(time.delta());
 
     velocity.value = GridCoords {
         ..Default::default()
@@ -89,13 +109,11 @@ fn player_movement_input(
 }
 
 fn move_player(
-    main_tick: Res<MainTick>,
     mut query: Query<(&mut GridCoords, &Velocity), With<Player>>,
+    walk_cycle_timer: Res<WalkCycleTimer>,
 ) {
-    // let delta_secs = time.delta_secs();
-
     for (mut player_grid_coords, velocity) in query.iter_mut() {
-        if main_tick.timer.just_finished() {
+        if walk_cycle_timer.timer.remaining_secs() < JITTER_THRESHOLD {
             let destination = *player_grid_coords + velocity.value;
             *player_grid_coords = destination;
         }
@@ -117,13 +135,30 @@ fn translate_transform_to_grid_coords(
 }
 
 fn translate_grid_coords_entities(
-    mut grid_coords_entities: Query<(&mut Transform, &GridCoords), Changed<GridCoords>>,
+    mut commands: Commands,
+    mut grid_coords_entities: Query<(Entity, &Transform, &GridCoords), Changed<GridCoords>>,
+    mut walk_cycle_timer: ResMut<WalkCycleTimer>,
 ) {
-    for (mut transform, grid_coords) in grid_coords_entities.iter_mut() {
-        transform.translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
-            *grid_coords,
-            IVec2::splat(GRID_SIZE.into()),
-        )
-        .extend(transform.translation.z);
+    for (entity, transform, grid_coords) in grid_coords_entities.iter_mut() {
+        if walk_cycle_timer.timer.remaining_secs() < JITTER_THRESHOLD {
+            walk_cycle_timer.timer.reset();
+
+            let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                *grid_coords,
+                IVec2::splat(GRID_SIZE.into()),
+            )
+            .extend(transform.translation.z);
+
+            let tween = Tween::new(
+                EaseFunction::Linear,
+                Duration::from_secs_f32(walk_cycle_timer.timer.remaining_secs()),
+                lens::TransformPositionLens {
+                    start: transform.translation,
+                    end: destination,
+                },
+            );
+
+            commands.entity(entity).insert(TweenAnim::new(tween));
+        }
     }
 }

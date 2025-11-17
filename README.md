@@ -5,6 +5,10 @@ A 2D lovecraftian investigation top-down game built on bevy engine, a rust ECS g
 
 ## Prerequisites
 
+Update your graphic drivers (works on nvidia-driver-580).
+If using Ubuntu, go to Additional Drivers -> Using NVIDIA driver metapackage from nvidia-driver-580 (proprietary)
+-> Apply changes -> Reboot
+
 Install git :
 ```bash
 sudo apt update

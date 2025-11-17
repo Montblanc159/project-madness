@@ -2,9 +2,10 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
+pub const TICK_DELTA: f32 = 0.25;
+
 #[derive(Resource)]
 pub struct MainTick {
-    /// How often to spawn a new bomb? (repeating timer)
     pub timer: Timer,
 }
 
@@ -15,12 +16,10 @@ pub fn plugin(app: &mut App) {
 
 fn setup_main_tick(mut commands: Commands) {
     commands.insert_resource(MainTick {
-        // create the repeating timer
-        timer: Timer::new(Duration::from_secs_f32(0.25), TimerMode::Repeating),
+        timer: Timer::new(Duration::from_secs_f32(TICK_DELTA), TimerMode::Repeating),
     })
 }
 
 fn tick_timer(time: Res<Time>, mut config: ResMut<MainTick>) {
-    // tick the timer
     config.timer.tick(time.delta());
 }
