@@ -13,8 +13,8 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((
         tick::plugin,
         third_party::plugin,
-        camera::plugin,
         map::plugin,
         player::plugin,
+        camera::plugin,
     ));
 }

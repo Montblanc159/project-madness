@@ -6,10 +6,10 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_tweening::*;
 
 use super::camera::CameraTarget;
+use super::map::{GRID_SIZE, LevelColliders};
 use super::tick::TICK_DELTA;
 
-const GRID_SIZE: u8 = 16;
-const JITTER_THRESHOLD: f32 = 0.015;
+pub const JITTER_THRESHOLD: f32 = 0.015;
 
 #[derive(Resource)]
 pub struct WalkCycleTimer {
@@ -118,16 +118,18 @@ fn player_movement_input(
 fn move_player(
     mut query: Query<(&mut GridCoords, &Velocity), With<Player>>,
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
+    level_colliders: Res<LevelColliders>,
     time: Res<Time>,
 ) {
     for (mut player_grid_coords, velocity) in query.iter_mut() {
+        let destination = *player_grid_coords + velocity.value;
+
         if walk_cycle_timer.timer.remaining_secs() == TICK_DELTA
             && !walk_cycle_timer.timer.is_paused()
+            && !level_colliders.in_collider(&destination)
         {
-            let destination = *player_grid_coords + velocity.value;
             *player_grid_coords = destination;
-        } else if walk_cycle_timer.timer.remaining_secs() < JITTER_THRESHOLD {
-            // } else if walk_cycle_timer.timer.just_finished() {
+        } else if walk_cycle_timer.timer.remaining_secs() <= JITTER_THRESHOLD {
             walk_cycle_timer.timer.reset();
             walk_cycle_timer.timer.pause();
         }
@@ -169,7 +171,7 @@ fn translate_transform_to_grid_coords(
                 x: transform.translation.x,
                 y: transform.translation.y,
             },
-            IVec2::splat(GRID_SIZE.into()),
+            IVec2::splat(GRID_SIZE),
         );
     }
 }
