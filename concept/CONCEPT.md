@@ -38,7 +38,7 @@ Vous, détective privé, descendant d'une longue lignée de personnes aux vies t
 
 - OU gagner des niveaux nécessitent de manger des cadavres ?
 
-## Mario's brainstorm
+## Mario's brainfart
 
 Quels sont les effets de la corruption sur les survivants et leurs descendants 2000 ans plus tard ? Anomalies physiques ou maladies mentales ? Peut-être que la corruption provoque l’apparition de “dons” mais ces dons sont à double tranchant ex:
 
