@@ -6,7 +6,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_tweening::*;
 
 use super::camera::CameraTarget;
-use super::map::{GRID_SIZE, LevelColliders};
+use super::map::colliders::{GRID_SIZE, LevelColliders};
 use super::tick::TICK_DELTA;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;
@@ -17,36 +17,45 @@ pub struct WalkCycleTimer {
 }
 
 #[derive(Default, Component)]
-struct Player;
+pub struct Player;
 
-#[derive(Default, Component)]
+#[derive(Default, Component, Debug)]
 struct Velocity {
     value: GridCoords,
 }
 
+#[derive(Message)]
+pub struct Teleported {
+    pub entity: Entity,
+    pub grid_coords: GridCoords,
+}
+
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, init_walk_cycle_timer);
+    app.add_message::<Teleported>();
     app.add_systems(
         Update,
         (
-            process_player,
-            translate_transform_to_grid_coords,
+            spawn_player,
+            teleport_player,
             player_movement_input,
-            move_player,
-            translate_grid_coords_entities,
+            update_player_grid_coords,
+            set_translate_with_grid_coords,
         )
             .chain(),
     );
 }
 
-fn process_player(
+fn spawn_player(
     mut commands: Commands,
-    new_entity_instances: Query<(Entity, &EntityInstance), Added<EntityInstance>>,
+    new_entity_instances: Query<&EntityInstance, Added<EntityInstance>>,
+    players: Query<Entity, With<Player>>,
     server: Res<AssetServer>,
 ) {
-    for (entity, entity_instance) in new_entity_instances.iter() {
-        if entity_instance.identifier == "Player".to_string() {
-            commands.entity(entity).insert((
+    for entity_instance in new_entity_instances.iter() {
+        if entity_instance.identifier == "Player".to_string() && !players.iter().next().is_some() {
+            println!("Spawning player");
+            commands.spawn((
                 Player,
                 CameraTarget,
                 AseSlice {
@@ -55,7 +64,7 @@ fn process_player(
                 },
                 Sprite::default(),
                 GridCoords {
-                    ..Default::default()
+                    ..entity_instance.grid.into()
                 },
                 Velocity {
                     ..Default::default()
@@ -73,49 +82,49 @@ fn init_walk_cycle_timer(mut commands: Commands) {
 
 fn player_movement_input(
     keys: Res<ButtonInput<KeyCode>>,
-    player_velocity: Single<&mut Velocity, With<Player>>,
+    player_velocities: Query<&mut Velocity, With<Player>>,
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
 ) {
-    let mut velocity = player_velocity.into_inner();
-
-    velocity.value = GridCoords {
-        ..Default::default()
-    };
-
-    // walk_cycle_timer.timer.pause();
-
-    if keys.pressed(KeyCode::KeyA) {
-        walk_cycle_timer.timer.unpause();
-
+    for mut velocity in player_velocities {
         velocity.value = GridCoords {
-            x: -1,
             ..Default::default()
-        }
-    } else if keys.pressed(KeyCode::KeyD) {
-        walk_cycle_timer.timer.unpause();
+        };
 
-        velocity.value = GridCoords {
-            x: 1,
-            ..Default::default()
-        }
-    } else if keys.pressed(KeyCode::KeyW) {
-        walk_cycle_timer.timer.unpause();
+        // walk_cycle_timer.timer.pause();
 
-        velocity.value = GridCoords {
-            y: 1,
-            ..Default::default()
-        }
-    } else if keys.pressed(KeyCode::KeyS) {
-        walk_cycle_timer.timer.unpause();
+        if keys.pressed(KeyCode::KeyA) {
+            walk_cycle_timer.timer.unpause();
 
-        velocity.value = GridCoords {
-            y: -1,
-            ..Default::default()
+            velocity.value = GridCoords {
+                x: -1,
+                ..Default::default()
+            }
+        } else if keys.pressed(KeyCode::KeyD) {
+            walk_cycle_timer.timer.unpause();
+
+            velocity.value = GridCoords {
+                x: 1,
+                ..Default::default()
+            }
+        } else if keys.pressed(KeyCode::KeyW) {
+            walk_cycle_timer.timer.unpause();
+
+            velocity.value = GridCoords {
+                y: 1,
+                ..Default::default()
+            }
+        } else if keys.pressed(KeyCode::KeyS) {
+            walk_cycle_timer.timer.unpause();
+
+            velocity.value = GridCoords {
+                y: -1,
+                ..Default::default()
+            }
         }
     }
 }
 
-fn move_player(
+fn update_player_grid_coords(
     mut query: Query<(&mut GridCoords, &Velocity), With<Player>>,
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
     level_colliders: Res<LevelColliders>,
@@ -138,9 +147,39 @@ fn move_player(
     }
 }
 
-fn translate_grid_coords_entities(
+fn teleport_player(
+    mut teleport_event: MessageReader<Teleported>,
+    mut query: Query<(&mut GridCoords, &mut Velocity, &mut Transform), With<Player>>,
+    mut walk_cycle_timer: ResMut<WalkCycleTimer>,
+) {
+    for event in teleport_event.read() {
+        if let Ok((mut player_grid_coords, mut player_velocity, mut player_transform)) =
+            query.get_mut(event.entity)
+        {
+            player_velocity.value = GridCoords {
+                ..Default::default()
+            };
+
+            player_transform.translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                event.grid_coords,
+                IVec2::splat(GRID_SIZE.into()),
+            )
+            .extend(player_transform.translation.z);
+
+            walk_cycle_timer.timer.reset();
+            walk_cycle_timer.timer.pause();
+
+            *player_grid_coords = event.grid_coords;
+        }
+    }
+}
+
+fn set_translate_with_grid_coords(
     mut commands: Commands,
-    mut grid_coords_entities: Query<(Entity, &Transform, &GridCoords), Changed<GridCoords>>,
+    mut grid_coords_entities: Query<
+        (Entity, &Transform, &GridCoords),
+        (Changed<GridCoords>, With<Player>),
+    >,
 ) {
     for (entity, transform, grid_coords) in grid_coords_entities.iter_mut() {
         let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
@@ -159,19 +198,5 @@ fn translate_grid_coords_entities(
         );
 
         commands.entity(entity).insert(TweenAnim::new(tween));
-    }
-}
-
-fn translate_transform_to_grid_coords(
-    mut grid_coords_entities: Query<(&Transform, &mut GridCoords), Added<GridCoords>>,
-) {
-    for (transform, mut grid_coords) in grid_coords_entities.iter_mut() {
-        *grid_coords = bevy_ecs_ldtk::utils::translation_to_grid_coords(
-            Vec2 {
-                x: transform.translation.x,
-                y: transform.translation.y,
-            },
-            IVec2::splat(GRID_SIZE),
-        );
     }
 }

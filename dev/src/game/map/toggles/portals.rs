@@ -1,0 +1,172 @@
+use std::collections::HashMap;
+
+use bevy::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
+
+use crate::game::{
+    map::{CurrentLevelInfos, colliders::GRID_SIZE},
+    player::{Player, Teleported},
+};
+
+#[derive(Component, Default, Clone, Debug)]
+struct Portal {
+    to: String,
+}
+
+#[derive(Component)]
+struct NotTeleportable;
+
+#[derive(Default, Resource)]
+struct LevelPortals {
+    portal_locations: HashMap<GridCoords, Portal>,
+}
+
+impl LevelPortals {
+    pub fn activated(&self, grid_coords: &GridCoords) -> bool {
+        self.portal_locations.contains_key(grid_coords)
+    }
+
+    pub fn portal_on_gridcoord(&self, grid_coords: &GridCoords) -> Option<&Portal> {
+        self.portal_locations.get(grid_coords)
+    }
+}
+
+pub fn plugin(app: &mut App) {
+    app.insert_resource(LevelPortals {
+        ..Default::default()
+    });
+
+    app.add_systems(
+        Update,
+        (
+            empty_portals_cache,
+            spawn_portals,
+            cache_portals,
+            spawn_player_on_portal,
+            activate,
+            remove_not_teleportable,
+        )
+            .chain(),
+    );
+}
+
+fn empty_portals_cache(
+    mut level_portals: ResMut<LevelPortals>,
+    mut level_messages: MessageReader<LevelEvent>,
+) {
+    for level_event in level_messages.read() {
+        if let LevelEvent::Spawned(_) = level_event {
+            level_portals.portal_locations = HashMap::new();
+        }
+    }
+}
+
+fn spawn_portals(
+    mut commands: Commands,
+    new_entity_instances: Query<(Entity, &EntityInstance, &Transform), Added<EntityInstance>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    for (entity, entity_instance, transform) in new_entity_instances.iter() {
+        if &entity_instance.identifier == &"Portal".to_string() {
+            let mut fields_iter = entity_instance.field_instances.iter();
+            if let Some(to_field_raw) = fields_iter.find(|&field| field.identifier == "To") {
+                if let Some(to_field) = match &to_field_raw.value {
+                    FieldValue::String(value) => value,
+                    _ => panic!("Wrong data type in portal 'to' field"),
+                } {
+                    let portal = Portal {
+                        to: to_field.clone(),
+                    };
+
+                    let grid_coords = bevy_ecs_ldtk::utils::translation_to_grid_coords(
+                        Vec2 {
+                            x: transform.translation.x,
+                            y: transform.translation.y,
+                        },
+                        IVec2::splat(GRID_SIZE),
+                    );
+
+                    let shape = meshes.add(Rectangle::new(16.0, 16.0));
+                    let color = Color::srgba(0., 0.5, 0., 0.5);
+
+                    commands.entity(entity).insert((
+                        Mesh2d(shape),
+                        MeshMaterial2d(materials.add(color)),
+                        portal,
+                        grid_coords,
+                    ));
+                }
+            }
+        }
+    }
+}
+
+fn cache_portals(
+    mut level_portals: ResMut<LevelPortals>,
+    portals: Query<(&Portal, &GridCoords), Added<Portal>>,
+) {
+    for (portal, grid_coords) in portals {
+        level_portals
+            .portal_locations
+            .insert(grid_coords.clone(), portal.clone());
+    }
+}
+
+fn activate(
+    mut commands: Commands,
+    portals: Res<LevelPortals>,
+    players: Query<
+        (Entity, &GridCoords),
+        (With<Player>, Changed<GridCoords>, Without<NotTeleportable>),
+    >,
+    mut level_selection: ResMut<LevelSelection>,
+) {
+    for (entity, grid_coords) in players {
+        if portals.activated(grid_coords) {
+            if let Some(portal) = portals.portal_on_gridcoord(grid_coords) {
+                *level_selection = LevelSelection::Identifier(portal.to.clone());
+                commands.entity(entity).insert(NotTeleportable);
+            }
+        }
+    }
+}
+
+fn spawn_player_on_portal(
+    level_portals: ResMut<LevelPortals>,
+    mut level_messages: MessageReader<LevelEvent>,
+    mut teleport_message: MessageWriter<Teleported>,
+    players: Query<Entity, With<Player>>,
+    level_infos: Res<CurrentLevelInfos>,
+) {
+    for level_event in level_messages.read() {
+        if let LevelEvent::Spawned(_) = level_event {
+            for player in players {
+                for (grid_coords, portal) in level_portals.portal_locations.iter() {
+                    if let Some(coming_from) = &level_infos.coming_from {
+                        if portal.to == *coming_from {
+                            teleport_message.write(Teleported {
+                                entity: player,
+                                grid_coords: *grid_coords,
+                            });
+
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn remove_not_teleportable(
+    mut commands: Commands,
+    portals: Res<LevelPortals>,
+    players: Query<(Entity, &GridCoords), (With<NotTeleportable>, Changed<GridCoords>)>,
+) {
+    for (entity, grid_coords) in players {
+        if !portals.activated(grid_coords) {
+            commands.entity(entity).remove::<NotTeleportable>();
+        }
+    }
+}
