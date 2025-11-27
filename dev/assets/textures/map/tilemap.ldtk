@@ -416,22 +416,22 @@
 					"entityInstances": [
 						{
 							"__identifier": "Portal",
-							"__grid": [0,3],
+							"__grid": [0,1],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#4385D7",
 							"iid": "df359cc0-ac70-11f0-b3bb-974af4be986b",
 							"width": 16,
-							"height": 16,
+							"height": 64,
 							"defUid": 6,
-							"px": [0,48],
+							"px": [0,16],
 							"fieldInstances": [{ "__identifier": "To", "__type": "String", "__value": "Level_0", "__tile": null, "defUid": 8, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["Level_0"]
 							}] }],
 							"__worldX": 384,
-							"__worldY": 96
+							"__worldY": 64
 						}
 					]
 				},
@@ -514,22 +514,22 @@
 					"entityInstances": [
 						{
 							"__identifier": "Portal",
-							"__grid": [15,5],
+							"__grid": [15,4],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#4385D7",
 							"iid": "d39fea00-ac70-11f0-b3bb-dd6e27570c7c",
 							"width": 16,
-							"height": 16,
+							"height": 64,
 							"defUid": 6,
-							"px": [240,80],
+							"px": [240,64],
 							"fieldInstances": [{ "__identifier": "To", "__type": "String", "__value": "Level_0", "__tile": null, "defUid": 8, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["Level_0"]
 							}] }],
 							"__worldX": -16,
-							"__worldY": 112
+							"__worldY": 96
 						}
 					]
 				},

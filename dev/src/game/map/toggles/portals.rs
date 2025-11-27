@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 use crate::game::{
-    map::{CurrentLevelInfos, colliders::GRID_SIZE},
+    map::{CurrentLevelInfos, colliders::GRID_SIZE, utils},
     player::{Player, Teleported},
 };
 
@@ -40,6 +40,7 @@ pub fn plugin(app: &mut App) {
         Update,
         (
             empty_portals_cache,
+            remove_portals, // inspect_entity,
             spawn_portals,
             cache_portals,
             spawn_player_on_portal,
@@ -61,13 +62,25 @@ fn empty_portals_cache(
     }
 }
 
+fn remove_portals(
+    portals: Query<Entity, With<Portal>>,
+    mut commands: Commands,
+    mut level_messages: MessageReader<LevelEvent>,
+) {
+    for level_event in level_messages.read() {
+        if let LevelEvent::Spawned(_) = level_event {
+            for entity in portals {
+                commands.entity(entity).despawn();
+            }
+        }
+    }
+}
+
 fn spawn_portals(
     mut commands: Commands,
-    new_entity_instances: Query<(Entity, &EntityInstance, &Transform), Added<EntityInstance>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    new_entity_instances: Query<(&EntityInstance, &Transform), Added<EntityInstance>>,
 ) {
-    for (entity, entity_instance, transform) in new_entity_instances.iter() {
+    for (entity_instance, transform) in new_entity_instances.iter() {
         if &entity_instance.identifier == &"Portal".to_string() {
             let mut fields_iter = entity_instance.field_instances.iter();
             if let Some(to_field_raw) = fields_iter.find(|&field| field.identifier == "To") {
@@ -75,27 +88,50 @@ fn spawn_portals(
                     FieldValue::String(value) => value,
                     _ => panic!("Wrong data type in portal 'to' field"),
                 } {
-                    let portal = Portal {
-                        to: to_field.clone(),
-                    };
+                    let entity_origin = utils::entity_top_left_pixel_position(
+                        transform.translation,
+                        entity_instance.width,
+                        entity_instance.height,
+                        GRID_SIZE,
+                    );
 
-                    let grid_coords = bevy_ecs_ldtk::utils::translation_to_grid_coords(
-                        Vec2 {
-                            x: transform.translation.x,
-                            y: transform.translation.y,
-                        },
+                    let origin_grid_coords = bevy_ecs_ldtk::utils::translation_to_grid_coords(
+                        entity_origin,
                         IVec2::splat(GRID_SIZE),
                     );
 
-                    let shape = meshes.add(Rectangle::new(16.0, 16.0));
-                    let color = Color::srgba(0., 0.5, 0., 0.5);
+                    let full_span_grid_coords = utils::grid_coords_from_entity_size(
+                        origin_grid_coords,
+                        entity_instance.width,
+                        entity_instance.height,
+                        GRID_SIZE,
+                    );
 
-                    commands.entity(entity).insert((
-                        Mesh2d(shape),
-                        MeshMaterial2d(materials.add(color)),
-                        portal,
-                        grid_coords,
-                    ));
+                    for grid_coords in full_span_grid_coords {
+                        let translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                            grid_coords,
+                            IVec2::splat(GRID_SIZE),
+                        )
+                        .extend(transform.translation.z);
+
+                        let portal = Portal {
+                            to: to_field.clone(),
+                        };
+
+                        commands.spawn((
+                            Transform {
+                                scale: Vec3 {
+                                    x: 1.,
+                                    y: 1.,
+                                    z: 1.,
+                                },
+                                translation: translation,
+                                ..*transform
+                            },
+                            portal,
+                            grid_coords,
+                        ));
+                    }
                 }
             }
         }

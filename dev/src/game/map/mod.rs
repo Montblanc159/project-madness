@@ -3,6 +3,7 @@ use bevy_ecs_ldtk::prelude::*;
 
 pub mod colliders;
 mod toggles;
+pub mod utils;
 
 #[derive(Resource, Default, Debug)]
 pub struct CurrentLevelInfos {

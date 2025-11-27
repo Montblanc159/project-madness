@@ -1,10 +1,4 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
-use bevy_tweening::*;
-
-use super::player::JITTER_THRESHOLD;
-use super::tick::TICK_DELTA;
 
 #[derive(Component)]
 #[require(Camera2d)]
@@ -42,21 +36,11 @@ fn initialize_camera(mut commands: Commands, camera_target: Query<&Transform, Wi
 }
 
 fn lock_camera_on_target(
-    mut commands: Commands,
-    camera: Single<(Entity, &Transform), With<MainCamera>>,
+    camera: Single<(Entity, &mut Transform), With<MainCamera>>,
     target: Single<&Transform, (With<CameraTarget>, Without<MainCamera>)>,
 ) {
-    let (camera_entity, camera_transform) = camera.into_inner();
+    let (_camera_entity, mut camera_transform) = camera.into_inner();
     let target = target.into_inner();
 
-    let tween = Tween::new(
-        EaseFunction::Linear,
-        Duration::from_secs_f32(TICK_DELTA + JITTER_THRESHOLD),
-        lens::TransformPositionLens {
-            start: camera_transform.translation,
-            end: target.translation,
-        },
-    );
-
-    commands.entity(camera_entity).insert(TweenAnim::new(tween));
+    camera_transform.translation = target.translation;
 }
