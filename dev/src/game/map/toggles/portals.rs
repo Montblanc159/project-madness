@@ -114,10 +114,6 @@ fn spawn_portals(
                         )
                         .extend(transform.translation.z);
 
-                        let portal = Portal {
-                            to: to_field.clone(),
-                        };
-
                         commands.spawn((
                             Transform {
                                 scale: Vec3 {
@@ -128,7 +124,9 @@ fn spawn_portals(
                                 translation: translation,
                                 ..*transform
                             },
-                            portal,
+                            Portal {
+                                to: to_field.clone(),
+                            },
                             grid_coords,
                         ));
                     }
