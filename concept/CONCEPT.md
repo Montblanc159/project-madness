@@ -38,6 +38,16 @@ Vous, détective privé, descendant d'une longue lignée de personnes aux vies t
 
 - OU gagner des niveaux nécessitent de manger des cadavres ?
 
+- On ne sait pas si le personnage sombre dans la folie ou s'il vit réellement des évènement surnaturels
+
+- Système de folie (jauge). Quatres phases avec changement d'environnement/colorimétrie :
+    - normal
+    - stressé : Plus rapide, plus fort, plus alerte mais rempli la jauge plus rapidement
+    - fou : plus de monstre, plus dangereux, personnage moins fort
+    - tombe dans les pommes/meurt -> retour à la case départ
+
+- La montagne est un rejeton de [Yog Sothoth](https://fr.wikipedia.org/wiki/Yog-Sothoth) ou d'[Azathoth](https://fr.wikipedia.org/wiki/Azathoth)
+
 ## Mario's brainfart
 
 Quels sont les effets de la corruption sur les survivants et leurs descendants 2000 ans plus tard ? Anomalies physiques ou maladies mentales ? Peut-être que la corruption provoque l’apparition de “dons” mais ces dons sont à double tranchant ex:
