@@ -40,7 +40,7 @@ pub fn plugin(app: &mut App) {
         Update,
         (
             empty_portals_cache,
-            remove_portals, // inspect_entity,
+            remove_portals,
             spawn_portals,
             cache_portals,
             spawn_player_on_portal,
@@ -82,54 +82,50 @@ fn spawn_portals(
 ) {
     for (entity_instance, transform) in new_entity_instances.iter() {
         if &entity_instance.identifier == &"Portal".to_string() {
-            let mut fields_iter = entity_instance.field_instances.iter();
-            if let Some(to_field_raw) = fields_iter.find(|&field| field.identifier == "To") {
-                if let Some(to_field) = match &to_field_raw.value {
-                    FieldValue::String(value) => value,
-                    _ => panic!("Wrong data type in portal 'to' field"),
-                } {
-                    let entity_origin = utils::entity_top_left_pixel_position(
-                        transform.translation,
-                        entity_instance.width,
-                        entity_instance.height,
-                        GRID_SIZE,
-                    );
+            let fields = utils::get_fields(entity_instance, vec!["To"]);
 
-                    let origin_grid_coords = bevy_ecs_ldtk::utils::translation_to_grid_coords(
-                        entity_origin,
+            if let Some(to_field) = fields.strings.get("To") {
+                let entity_origin = utils::entity_top_left_pixel_position(
+                    transform.translation,
+                    entity_instance.width,
+                    entity_instance.height,
+                    GRID_SIZE,
+                );
+
+                let origin_grid_coords = bevy_ecs_ldtk::utils::translation_to_grid_coords(
+                    entity_origin,
+                    IVec2::splat(GRID_SIZE),
+                );
+
+                let full_span_grid_coords = utils::grid_coords_from_entity_size(
+                    origin_grid_coords,
+                    entity_instance.width,
+                    entity_instance.height,
+                    GRID_SIZE,
+                );
+
+                for grid_coords in full_span_grid_coords {
+                    let translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                        grid_coords,
                         IVec2::splat(GRID_SIZE),
-                    );
+                    )
+                    .extend(transform.translation.z);
 
-                    let full_span_grid_coords = utils::grid_coords_from_entity_size(
-                        origin_grid_coords,
-                        entity_instance.width,
-                        entity_instance.height,
-                        GRID_SIZE,
-                    );
-
-                    for grid_coords in full_span_grid_coords {
-                        let translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
-                            grid_coords,
-                            IVec2::splat(GRID_SIZE),
-                        )
-                        .extend(transform.translation.z);
-
-                        commands.spawn((
-                            Transform {
-                                scale: Vec3 {
-                                    x: 1.,
-                                    y: 1.,
-                                    z: 1.,
-                                },
-                                translation: translation,
-                                ..*transform
+                    commands.spawn((
+                        Transform {
+                            scale: Vec3 {
+                                x: 1.,
+                                y: 1.,
+                                z: 1.,
                             },
-                            Portal {
-                                to: to_field.clone(),
-                            },
-                            grid_coords,
-                        ));
-                    }
+                            translation: translation,
+                            ..*transform
+                        },
+                        Portal {
+                            to: to_field.clone(),
+                        },
+                        grid_coords,
+                    ));
                 }
             }
         }

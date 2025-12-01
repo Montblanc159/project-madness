@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 pub mod colliders;
-mod toggles;
 pub mod utils;
+mod zones;
 
 #[derive(Resource, Default, Debug)]
 pub struct CurrentLevelInfos {
@@ -21,7 +21,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Startup, map_setup);
     app.add_systems(Update, set_current_level_identifier);
     app.add_plugins(colliders::plugin);
-    app.add_plugins(toggles::plugin);
+    app.add_plugins(zones::plugin);
 }
 
 fn map_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
