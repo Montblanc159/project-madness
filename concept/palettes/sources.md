@@ -7,6 +7,7 @@
 [aged-terracotta-16-1x.png](https://lospec.com/palette-list/aged-terracotta-16)
 [h16da-1x.png](https://lospec.com/palette-list/h16da)
 [colorboy-1x.png](https://lospec.com/palette-list/colorboy)
+[fzt-ethereal-16-1x.png](https://lospec.com/palette-list/fzt-ethereal-16)
 
 ## 56 colors palettes (= GBA)
 [pokemon-ruby-sapphire-exterior-1x.png](https://lospec.com/palette-list/pokemon-ruby-sapphire-exterior)
