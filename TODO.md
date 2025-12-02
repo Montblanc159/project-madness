@@ -13,6 +13,7 @@ Thicken the plot
 
 ### Actions
 Actions based on last direction +1 gridcoords with "spacebar" - OK
+Rebuild using a facing state -> allow changing orientation when on a wall - OK
 
 ### NPCs
 - add npcs
@@ -34,6 +35,8 @@ three levels:
 
 ### Refactors
 ??
+- rethink some naming conventions
+- game hierarchy ??
 
 ### Document
 Everything

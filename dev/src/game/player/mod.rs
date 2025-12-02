@@ -10,6 +10,7 @@ use super::map::colliders::{GRID_SIZE, LevelColliders};
 use super::tick::TICK_DELTA;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;
+const ACTION_Z_DEPTH: f32 = 2.;
 
 #[derive(Resource)]
 pub struct WalkCycleTimer {
@@ -24,23 +25,51 @@ struct Velocity {
     value: GridCoords,
 }
 
+#[derive(Component, Debug, Clone)]
+struct ActionZone {
+    value: GridCoords,
+    display: Option<Entity>,
+}
+
+#[derive(Component, Debug)]
+struct ActionZoneDisplay;
+
+#[derive(Component)]
+enum Facing {
+    North,
+    East,
+    South,
+    West,
+}
+
 #[derive(Message)]
 pub struct Teleported {
     pub entity: Entity,
     pub grid_coords: GridCoords,
 }
 
+#[derive(Message)]
+pub struct Activate {
+    pub _entity: Entity,
+    pub grid_coords: GridCoords,
+}
+
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, init_walk_cycle_timer);
     app.add_message::<Teleported>();
+    app.add_message::<Activate>();
     app.add_systems(
         Update,
         (
+            display_action_zone,
             spawn_player,
+            set_action_grid_coords,
+            activate,
             teleport_player,
             player_movement_input,
             update_player_grid_coords,
             set_translate_with_grid_coords,
+            update_display_action_zone,
         )
             .chain(),
     );
@@ -54,7 +83,6 @@ fn spawn_player(
 ) {
     for entity_instance in new_entity_instances.iter() {
         if entity_instance.identifier == "Player".to_string() && !players.iter().next().is_some() {
-            println!("Spawning player");
             commands.spawn((
                 Player,
                 CameraTarget,
@@ -69,6 +97,11 @@ fn spawn_player(
                 Velocity {
                     ..Default::default()
                 },
+                ActionZone {
+                    value: (entity_instance.grid + ivec2(0, -1)).into(),
+                    display: None,
+                },
+                Facing::South,
             ));
         }
     }
@@ -82,19 +115,18 @@ fn init_walk_cycle_timer(mut commands: Commands) {
 
 fn player_movement_input(
     keys: Res<ButtonInput<KeyCode>>,
-    player_velocities: Query<&mut Velocity, With<Player>>,
+    player_velocities: Query<(&mut Velocity, &mut Facing), With<Player>>,
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
 ) {
-    for mut velocity in player_velocities {
+    for (mut velocity, mut facing) in player_velocities {
         velocity.value = GridCoords {
             ..Default::default()
         };
 
-        // walk_cycle_timer.timer.pause();
-
         if keys.pressed(KeyCode::KeyA) {
             walk_cycle_timer.timer.unpause();
 
+            *facing = Facing::West;
             velocity.value = GridCoords {
                 x: -1,
                 ..Default::default()
@@ -102,6 +134,7 @@ fn player_movement_input(
         } else if keys.pressed(KeyCode::KeyD) {
             walk_cycle_timer.timer.unpause();
 
+            *facing = Facing::East;
             velocity.value = GridCoords {
                 x: 1,
                 ..Default::default()
@@ -109,6 +142,7 @@ fn player_movement_input(
         } else if keys.pressed(KeyCode::KeyW) {
             walk_cycle_timer.timer.unpause();
 
+            *facing = Facing::North;
             velocity.value = GridCoords {
                 y: 1,
                 ..Default::default()
@@ -116,6 +150,7 @@ fn player_movement_input(
         } else if keys.pressed(KeyCode::KeyS) {
             walk_cycle_timer.timer.unpause();
 
+            *facing = Facing::South;
             velocity.value = GridCoords {
                 y: -1,
                 ..Default::default()
@@ -198,5 +233,91 @@ fn set_translate_with_grid_coords(
         );
 
         commands.entity(entity).insert(TweenAnim::new(tween));
+    }
+}
+
+fn set_action_grid_coords(
+    players: Query<(&mut ActionZone, &GridCoords, &Facing), (With<Player>, Changed<Facing>)>,
+) {
+    for (mut action_zone, grid_coords, facing) in players {
+        action_zone.value = *grid_coords
+            + (match facing {
+                Facing::North => GridCoords { y: 1, x: 0 },
+                Facing::East => GridCoords { y: 0, x: 1 },
+                Facing::South => GridCoords { y: -1, x: 0 },
+                Facing::West => GridCoords { y: 0, x: -1 },
+            })
+    }
+}
+
+fn display_action_zone(
+    action_zones: Query<&mut ActionZone, (With<Player>, Added<ActionZone>)>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let color = Color::Srgba(Srgba {
+        red: 1.0,
+        green: 1.0,
+        blue: 1.0,
+        alpha: 0.05,
+    });
+
+    for mut action_zone in action_zones {
+        let zone = action_zone.value;
+
+        let display = commands
+            .spawn((
+                Mesh2d(meshes.add(Rectangle::new(2., 2.))),
+                MeshMaterial2d(materials.add(color)),
+                ActionZoneDisplay,
+                Transform {
+                    translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                        zone,
+                        IVec2::splat(GRID_SIZE.into()),
+                    )
+                    .extend(ACTION_Z_DEPTH),
+                    ..Default::default()
+                },
+            ))
+            .id();
+
+        action_zone.display = Some(display);
+    }
+}
+
+fn update_display_action_zone(
+    action_zones: Query<&ActionZone, (Changed<ActionZone>, With<Player>)>,
+    mut commands: Commands,
+) {
+    for action_zone in action_zones {
+        if let Some(entity) = action_zone.display {
+            commands
+                .entity(entity)
+                .remove::<Transform>()
+                .insert(Transform {
+                    translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                        action_zone.value,
+                        IVec2::splat(GRID_SIZE.into()),
+                    )
+                    .extend(ACTION_Z_DEPTH),
+                    ..Default::default()
+                });
+        }
+    }
+}
+
+fn activate(
+    keys: Res<ButtonInput<KeyCode>>,
+    players: Query<(Entity, &ActionZone), With<Player>>,
+    mut activate_event: MessageWriter<Activate>,
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        for (entity, action_zone) in players {
+            activate_event.write(Activate {
+                _entity: entity,
+                grid_coords: action_zone.value,
+            });
+        }
     }
 }

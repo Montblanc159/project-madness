@@ -11,7 +11,7 @@
 	"iid": "a9b0e080-ac70-11f0-9e11-5d759bf7de8d",
 	"jsonVersion": "1.5.4",
 	"appBuildId": 488406,
-	"nextUid": 9,
+	"nextUid": 10,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -224,6 +224,41 @@
 					"tilesetUid": null
 				}
 			]
+		},
+		{
+			"identifier": "Dummy",
+			"uid": 9,
+			"tags": [],
+			"exportToToc": false,
+			"allowOutOfBounds": false,
+			"doc": null,
+			"width": 16,
+			"height": 16,
+			"resizableX": false,
+			"resizableY": false,
+			"minWidth": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"maxHeight": null,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 1,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#EF3FF4",
+			"renderMode": "Rectangle",
+			"showName": true,
+			"tilesetId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"uiTileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": []
 		}
 	], "tilesets": [], "enums": [], "externalEnums": [], "levelFields": [] },
 	"levels": [
@@ -325,6 +360,22 @@
 							}] }],
 							"__worldX": 368,
 							"__worldY": 64
+						},
+						{
+							"__identifier": "Dummy",
+							"__grid": [8,5],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#EF3FF4",
+							"iid": "254466f0-ac70-11f0-a760-613d253b2d84",
+							"width": 16,
+							"height": 16,
+							"defUid": 9,
+							"px": [128,80],
+							"fieldInstances": [],
+							"__worldX": 128,
+							"__worldY": 80
 						}
 					]
 				},
