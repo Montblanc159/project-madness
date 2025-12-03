@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::EntityInstance;
 
-use crate::game::map::{colliders::GRID_SIZE, utils};
+use crate::game::map::{GRID_SIZE, utils};
 
 const IDENTIFIER: &str = "Dummy";
 

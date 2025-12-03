@@ -6,7 +6,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_tweening::*;
 
 use super::camera::CameraTarget;
-use super::map::colliders::{GRID_SIZE, LevelColliders};
+use super::map::{GRID_SIZE, colliders::LevelColliders};
 use super::tick::TICK_DELTA;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;

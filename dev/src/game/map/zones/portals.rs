@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 use crate::game::{
-    map::{CurrentLevelInfos, colliders::GRID_SIZE, utils},
+    map::{CurrentLevelInfos, GRID_SIZE, utils},
     player::{Player, Teleported},
 };
 
@@ -68,7 +68,7 @@ fn remove_portals(
     mut level_messages: MessageReader<LevelEvent>,
 ) {
     for level_event in level_messages.read() {
-        if let LevelEvent::Spawned(_) = level_event {
+        if let LevelEvent::Despawned(_) = level_event {
             for entity in portals {
                 commands.entity(entity).despawn();
             }

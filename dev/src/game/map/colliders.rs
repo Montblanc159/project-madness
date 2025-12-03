@@ -3,8 +3,6 @@ use std::collections::HashSet;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-pub const GRID_SIZE: i32 = 16;
-
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Collider;
 
@@ -54,8 +52,8 @@ fn cache_collider_locations(
 
             let new_level_colliders = LevelColliders {
                 collider_locations,
-                level_width: level.px_wid / GRID_SIZE,
-                level_height: level.px_hei / GRID_SIZE,
+                level_width: level.px_wid / super::GRID_SIZE,
+                level_height: level.px_hei / super::GRID_SIZE,
             };
 
             *level_colliders = new_level_colliders;

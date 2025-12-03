@@ -6,6 +6,8 @@ pub mod colliders;
 pub mod utils;
 mod zones;
 
+pub const GRID_SIZE: i32 = 16;
+
 #[derive(Resource, Default, Debug)]
 pub struct CurrentLevelInfos {
     identifier: String,
