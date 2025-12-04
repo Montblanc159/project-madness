@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
 use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
 
-use crate::game::map::GRID_SIZE;
+use crate::game::map::{GRID_SIZE, colliders::Collider};
 
 mod dummy_npc;
 
@@ -31,6 +31,7 @@ fn spawn_npc<T: Component + Npc>(
                 GridCoords {
                     ..entity_instance.grid.into()
                 },
+                Collider,
                 Transform {
                     translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
                         entity_instance.grid.into(),

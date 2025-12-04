@@ -23,12 +23,12 @@ pub struct Player;
 
 #[derive(Default, Component, Debug)]
 struct Velocity {
-    value: GridCoords,
+    value: IVec2,
 }
 
 #[derive(Component, Debug, Clone)]
 struct ActionZone {
-    value: GridCoords,
+    value: IVec2,
     display: Option<Entity>,
 }
 
@@ -46,13 +46,13 @@ enum Facing {
 #[derive(Message)]
 pub struct Teleported {
     pub entity: Entity,
-    pub grid_coords: GridCoords,
+    pub grid_coords: IVec2,
 }
 
 #[derive(Message)]
 pub struct Activate {
     pub _entity: Entity,
-    pub grid_coords: GridCoords,
+    pub grid_coords: IVec2,
 }
 
 pub fn plugin(app: &mut App) {
@@ -120,7 +120,7 @@ fn player_movement_input(
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
 ) {
     for (mut velocity, mut facing) in player_velocities {
-        velocity.value = GridCoords {
+        velocity.value = IVec2 {
             ..Default::default()
         };
 
@@ -128,7 +128,7 @@ fn player_movement_input(
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::West;
-            velocity.value = GridCoords {
+            velocity.value = IVec2 {
                 x: -1,
                 ..Default::default()
             }
@@ -136,7 +136,7 @@ fn player_movement_input(
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::East;
-            velocity.value = GridCoords {
+            velocity.value = IVec2 {
                 x: 1,
                 ..Default::default()
             }
@@ -144,7 +144,7 @@ fn player_movement_input(
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::North;
-            velocity.value = GridCoords {
+            velocity.value = IVec2 {
                 y: 1,
                 ..Default::default()
             }
@@ -152,7 +152,7 @@ fn player_movement_input(
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::South;
-            velocity.value = GridCoords {
+            velocity.value = IVec2 {
                 y: -1,
                 ..Default::default()
             }
@@ -167,7 +167,7 @@ fn update_player_grid_coords(
     time: Res<Time>,
 ) {
     for (mut player_grid_coords, velocity) in query.iter_mut() {
-        let destination = *player_grid_coords + velocity.value;
+        let destination = *player_grid_coords + velocity.value.into();
 
         if walk_cycle_timer.timer.remaining_secs() == TICK_DELTA
             && !walk_cycle_timer.timer.is_paused()
@@ -192,12 +192,12 @@ fn teleport_player(
         if let Ok((mut player_grid_coords, mut player_velocity, mut player_transform)) =
             query.get_mut(event.entity)
         {
-            player_velocity.value = GridCoords {
+            player_velocity.value = IVec2 {
                 ..Default::default()
             };
 
             player_transform.translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
-                event.grid_coords,
+                event.grid_coords.into(),
                 IVec2::splat(GRID_SIZE.into()),
             )
             .extend(PLAYER_Z_DEPTH);
@@ -205,7 +205,7 @@ fn teleport_player(
             walk_cycle_timer.timer.reset();
             walk_cycle_timer.timer.pause();
 
-            *player_grid_coords = event.grid_coords;
+            *player_grid_coords = event.grid_coords.into();
         }
     }
 }
@@ -241,13 +241,14 @@ fn set_action_grid_coords(
     players: Query<(&mut ActionZone, &GridCoords, &Facing), (With<Player>, Changed<Facing>)>,
 ) {
     for (mut action_zone, grid_coords, facing) in players {
-        action_zone.value = *grid_coords
+        action_zone.value = (*grid_coords
             + (match facing {
                 Facing::North => GridCoords { y: 1, x: 0 },
                 Facing::East => GridCoords { y: 0, x: 1 },
                 Facing::South => GridCoords { y: -1, x: 0 },
                 Facing::West => GridCoords { y: 0, x: -1 },
-            })
+            }))
+        .into()
     }
 }
 
@@ -274,7 +275,7 @@ fn display_action_zone(
                 ActionZoneDisplay,
                 Transform {
                     translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
-                        zone,
+                        zone.into(),
                         IVec2::splat(GRID_SIZE.into()),
                     )
                     .extend(ACTION_Z_DEPTH),
@@ -298,7 +299,7 @@ fn update_display_action_zone(
                 .remove::<Transform>()
                 .insert(Transform {
                     translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
-                        action_zone.value,
+                        action_zone.value.into(),
                         IVec2::splat(GRID_SIZE.into()),
                     )
                     .extend(ACTION_Z_DEPTH),
@@ -317,7 +318,7 @@ fn activate(
         for (entity, action_zone) in players {
             activate_event.write(Activate {
                 _entity: entity,
-                grid_coords: action_zone.value,
+                grid_coords: action_zone.value.into(),
             });
         }
     }

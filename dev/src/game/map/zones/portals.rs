@@ -177,7 +177,7 @@ fn spawn_player_on_portal(
                         if portal.to == *coming_from {
                             teleport_message.write(Teleported {
                                 entity: player,
-                                grid_coords: *grid_coords,
+                                grid_coords: (*grid_coords).into(),
                             });
 
                             break;

@@ -19,7 +19,7 @@ pub fn activate<T: Component + Action>(
 ) {
     for msg in activate_msg.read() {
         for (grid_coords, action) in actionables {
-            if msg.grid_coords == *grid_coords {
+            if msg.grid_coords == (*grid_coords).into() {
                 action.activate();
             }
         }
