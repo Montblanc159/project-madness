@@ -11,6 +11,7 @@ use super::tick::TICK_DELTA;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;
 const ACTION_Z_DEPTH: f32 = 2.;
+const PLAYER_Z_DEPTH: f32 = 2.;
 
 #[derive(Resource)]
 pub struct WalkCycleTimer {
@@ -199,7 +200,7 @@ fn teleport_player(
                 event.grid_coords,
                 IVec2::splat(GRID_SIZE.into()),
             )
-            .extend(player_transform.translation.z);
+            .extend(PLAYER_Z_DEPTH);
 
             walk_cycle_timer.timer.reset();
             walk_cycle_timer.timer.pause();
@@ -221,7 +222,7 @@ fn set_translate_with_grid_coords(
             *grid_coords,
             IVec2::splat(GRID_SIZE.into()),
         )
-        .extend(transform.translation.z);
+        .extend(PLAYER_Z_DEPTH);
 
         let tween = Tween::new(
             EaseFunction::Linear,
