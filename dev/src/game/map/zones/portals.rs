@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 use crate::game::{
-    map::{CurrentLevelInfos, GRID_SIZE, utils},
+    map::{CurrentLevelInfos, GRID_SIZE, utils, zones::Zones},
     player::{Player, Teleported},
 };
 
@@ -16,64 +14,30 @@ struct Portal {
 #[derive(Component)]
 struct NotTeleportable;
 
-#[derive(Default, Resource)]
-struct LevelPortals {
-    portal_locations: HashMap<GridCoords, Portal>,
-}
-
-impl LevelPortals {
-    pub fn activated(&self, grid_coords: &GridCoords) -> bool {
-        self.portal_locations.contains_key(grid_coords)
-    }
-
+impl Zones<Portal> {
     pub fn portal_on_gridcoord(&self, grid_coords: &GridCoords) -> Option<&Portal> {
-        self.portal_locations.get(grid_coords)
+        self.locations.get(grid_coords)
     }
 }
 
 pub fn plugin(app: &mut App) {
-    app.insert_resource(LevelPortals {
+    app.insert_resource(Zones::<Portal> {
         ..Default::default()
     });
 
     app.add_systems(
         Update,
         (
-            empty_portals_cache,
-            remove_portals,
+            super::empty_zones_cache::<Portal>,
+            super::remove_zones::<Portal>,
             spawn_portals,
-            cache_portals,
+            super::cache_zones::<Portal>,
             spawn_player_on_portal,
             activate,
             remove_not_teleportable,
         )
             .chain(),
     );
-}
-
-fn empty_portals_cache(
-    mut level_portals: ResMut<LevelPortals>,
-    mut level_messages: MessageReader<LevelEvent>,
-) {
-    for level_event in level_messages.read() {
-        if let LevelEvent::Spawned(_) = level_event {
-            level_portals.portal_locations = HashMap::new();
-        }
-    }
-}
-
-fn remove_portals(
-    portals: Query<Entity, With<Portal>>,
-    mut commands: Commands,
-    mut level_messages: MessageReader<LevelEvent>,
-) {
-    for level_event in level_messages.read() {
-        if let LevelEvent::Despawned(_) = level_event {
-            for entity in portals {
-                commands.entity(entity).despawn();
-            }
-        }
-    }
 }
 
 fn spawn_portals(
@@ -132,20 +96,9 @@ fn spawn_portals(
     }
 }
 
-fn cache_portals(
-    mut level_portals: ResMut<LevelPortals>,
-    portals: Query<(&Portal, &GridCoords), Added<Portal>>,
-) {
-    for (portal, grid_coords) in portals {
-        level_portals
-            .portal_locations
-            .insert(grid_coords.clone(), portal.clone());
-    }
-}
-
 fn activate(
     mut commands: Commands,
-    portals: Res<LevelPortals>,
+    portals: Res<Zones<Portal>>,
     players: Query<
         (Entity, &GridCoords),
         (With<Player>, Changed<GridCoords>, Without<NotTeleportable>),
@@ -163,7 +116,7 @@ fn activate(
 }
 
 fn spawn_player_on_portal(
-    level_portals: ResMut<LevelPortals>,
+    level_portals: ResMut<Zones<Portal>>,
     mut level_messages: MessageReader<LevelEvent>,
     mut teleport_message: MessageWriter<Teleported>,
     players: Query<Entity, With<Player>>,
@@ -172,7 +125,7 @@ fn spawn_player_on_portal(
     for level_event in level_messages.read() {
         if let LevelEvent::Spawned(_) = level_event {
             for player in players {
-                for (grid_coords, portal) in level_portals.portal_locations.iter() {
+                for (grid_coords, portal) in level_portals.locations.iter() {
                     if let Some(coming_from) = &level_infos.coming_from {
                         if portal.to == *coming_from {
                             teleport_message.write(Teleported {
@@ -191,7 +144,7 @@ fn spawn_player_on_portal(
 
 fn remove_not_teleportable(
     mut commands: Commands,
-    portals: Res<LevelPortals>,
+    portals: Res<Zones<Portal>>,
     players: Query<(Entity, &GridCoords), (With<NotTeleportable>, Changed<GridCoords>)>,
 ) {
     for (entity, grid_coords) in players {
