@@ -16,19 +16,24 @@ Actions based on last direction +1 gridcoords with "spacebar" - OK
 Rebuild using a facing state -> allow changing orientation when on a wall - OK
 
 ### Map hierarchy
-- refacto colliders ? -> linked to make npc collide
-- refacto portals
+- refacto colliders ? -> linked to make npc collide - OK
+- refacto portals -> OK
 
 ### NPCs
 - add npcs - OK
-- make them collide
-- make them wander
-- make them talk
+- make them collide - OK
+- make them wander - OK
+    - Slow wandering
+    - add a zone to limit wandering ? (clamp)
+- make them talk - dialogue system with ink
 
-- add ennemies (later)
+
+- add ennemies (later) + [pathfinding](https://en.wikipedia.org/wiki/A*_search_algorithm)
 - fight system (later)
 
 ### Add items
+
+### Add multiple input (keyboard + gamepad)
 
 
 ### Map based on madness level (later)
