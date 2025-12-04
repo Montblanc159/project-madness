@@ -15,8 +15,13 @@ Thicken the plot
 Actions based on last direction +1 gridcoords with "spacebar" - OK
 Rebuild using a facing state -> allow changing orientation when on a wall - OK
 
+### Map hierarchy
+- refacto colliders ? -> linked to make npc collide
+- refacto portals
+
 ### NPCs
-- add npcs
+- add npcs - OK
+- make them collide
 - make them wander
 - make them talk
 
