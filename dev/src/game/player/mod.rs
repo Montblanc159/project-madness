@@ -6,7 +6,10 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_tweening::*;
 
 use super::camera::CameraTarget;
-use super::map::{GRID_SIZE, colliders::LevelColliders};
+use super::map::{
+    GRID_SIZE,
+    colliders::{Collider, LevelColliders},
+};
 use super::tick::TICK_DELTA;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;
@@ -86,6 +89,7 @@ fn spawn_player(
         if entity_instance.identifier == "Player".to_string() && !players.iter().next().is_some() {
             commands.spawn((
                 Player,
+                Collider,
                 CameraTarget,
                 AseSlice {
                     name: "player_idle".into(),
