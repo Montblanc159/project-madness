@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -13,7 +13,7 @@ pub struct ColliderBundle {
 
 #[derive(Default, Resource)]
 pub struct LevelColliders {
-    collider_locations: HashSet<GridCoords>,
+    collider_locations: HashMap<Entity, GridCoords>,
     level_width: i32,
     level_height: i32,
 }
@@ -24,7 +24,10 @@ impl LevelColliders {
             || grid_coords.y < 0
             || grid_coords.x >= self.level_width
             || grid_coords.y >= self.level_height
-            || self.collider_locations.contains(grid_coords)
+            || self
+                .collider_locations
+                .values()
+                .any(|grid_coord| grid_coord == grid_coords)
     }
 }
 
@@ -34,9 +37,10 @@ pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
+            empty_collider_locations_cache,
             cache_level_bounds,
             cache_collider_locations,
-            empty_collider_locations_cache,
+            update_collider_locations,
         ),
     );
 }
@@ -66,16 +70,25 @@ fn empty_collider_locations_cache(
 ) {
     for level_event in level_messages.read() {
         if let LevelEvent::Despawned(_) = level_event {
-            level_colliders.collider_locations = HashSet::new();
+            level_colliders.collider_locations = HashMap::new();
         }
     }
 }
 
 fn cache_collider_locations(
     mut level_colliders: ResMut<LevelColliders>,
-    colliders: Query<&GridCoords, With<Collider>>,
+    colliders: Query<(Entity, &GridCoords), With<Collider>>,
 ) {
-    for collider in colliders {
-        level_colliders.collider_locations.insert(*collider);
+    for (entity, collider) in colliders {
+        level_colliders.collider_locations.insert(entity, *collider);
+    }
+}
+
+fn update_collider_locations(
+    mut level_colliders: ResMut<LevelColliders>,
+    colliders: Query<(Entity, &GridCoords), (With<Collider>, Changed<GridCoords>)>,
+) {
+    for (entity, collider) in colliders {
+        level_colliders.collider_locations.insert(entity, *collider);
     }
 }
