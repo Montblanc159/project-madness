@@ -1,8 +1,19 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
 use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
+use bevy_tweening::*;
+use rand::prelude::*;
 
-use crate::game::map::{GRID_SIZE, colliders::Collider};
+use crate::game::{
+    map::{
+        GRID_SIZE,
+        colliders::{Collider, LevelColliders},
+    },
+    player::JITTER_THRESHOLD,
+    tick::{MainTick, TICK_DELTA},
+};
 
 mod dummy_npc;
 
@@ -57,5 +68,70 @@ fn despawn_npc<T: Component + Npc>(
                 commands.entity(entity).despawn();
             }
         }
+    }
+}
+
+fn wander<T: Component + Npc>(
+    npc: Query<&mut GridCoords, With<T>>,
+    level_colliders: Res<LevelColliders>,
+    main_tick: Res<MainTick>,
+) {
+    if main_tick.timer.just_finished() {
+        let mut rng = rand::rng();
+        let nums: Vec<i32> = (0..2).collect();
+
+        for mut grid_coords in npc {
+            let move_distance = nums.choose(&mut rng);
+            let left_or_up = rand::random_bool(1.0 / 2.0);
+            let add_or_sub = rand::random_bool(1.0 / 2.0);
+
+            if let Some(move_distance) = move_distance {
+                let movement_vector = if left_or_up {
+                    IVec2 {
+                        x: *move_distance,
+                        y: 0,
+                    }
+                } else {
+                    IVec2 {
+                        x: 0,
+                        y: *move_distance,
+                    }
+                };
+
+                let destination = if add_or_sub {
+                    *grid_coords + movement_vector.into()
+                } else {
+                    *grid_coords - movement_vector.into()
+                };
+
+                if !level_colliders.in_collider(&destination) {
+                    *grid_coords = destination;
+                }
+            }
+        }
+    }
+}
+
+fn update_npc_position<T: Component + Npc>(
+    mut commands: Commands,
+    npc: Query<(Entity, &Transform, &GridCoords), (With<T>, Changed<GridCoords>)>,
+) {
+    for (entity, transform, grid_coords) in npc {
+        let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
+            *grid_coords,
+            IVec2::splat(GRID_SIZE.into()),
+        )
+        .extend(NPC_Z_DEPTH);
+
+        let tween = Tween::new(
+            EaseFunction::Linear,
+            Duration::from_secs_f32(TICK_DELTA + JITTER_THRESHOLD),
+            lens::TransformPositionLens {
+                start: transform.translation,
+                end: destination,
+            },
+        );
+
+        commands.entity(entity).insert(TweenAnim::new(tween));
     }
 }
