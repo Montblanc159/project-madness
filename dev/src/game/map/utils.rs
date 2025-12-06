@@ -53,6 +53,20 @@ pub fn grid_coords_from_entity_size(
     grid_coords
 }
 
+pub fn full_span_grid_coords(
+    width: i32,
+    height: i32,
+    translation: Vec3,
+    grid_size: i32,
+) -> Vec<GridCoords> {
+    let entity_origin = entity_top_left_pixel_position(translation, width, height, grid_size);
+
+    let origin_grid_coords =
+        bevy_ecs_ldtk::utils::translation_to_grid_coords(entity_origin, IVec2::splat(grid_size));
+
+    grid_coords_from_entity_size(origin_grid_coords, width, height, grid_size)
+}
+
 pub struct Results {
     pub strings: HashMap<String, String>,
     pub floats: HashMap<String, f32>,

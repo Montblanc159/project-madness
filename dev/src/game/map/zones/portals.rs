@@ -49,22 +49,10 @@ fn spawn_portals(
             let fields = utils::get_fields(entity_instance, vec!["To"]);
 
             if let Some(to_field) = fields.strings.get("To") {
-                let entity_origin = utils::entity_top_left_pixel_position(
+                let full_span_grid_coords = utils::full_span_grid_coords(
+                    entity_instance.width,
+                    entity_instance.height,
                     transform.translation,
-                    entity_instance.width,
-                    entity_instance.height,
-                    GRID_SIZE,
-                );
-
-                let origin_grid_coords = bevy_ecs_ldtk::utils::translation_to_grid_coords(
-                    entity_origin,
-                    IVec2::splat(GRID_SIZE),
-                );
-
-                let full_span_grid_coords = utils::grid_coords_from_entity_size(
-                    origin_grid_coords,
-                    entity_instance.width,
-                    entity_instance.height,
                     GRID_SIZE,
                 );
 
