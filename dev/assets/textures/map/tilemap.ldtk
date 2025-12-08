@@ -226,7 +226,7 @@
 			]
 		},
 		{
-			"identifier": "Dummy",
+			"identifier": "DummyAction",
 			"uid": 9,
 			"tags": [],
 			"exportToToc": false,
@@ -293,45 +293,7 @@
 			"limitBehavior": "MoveLastOne",
 			"pivotX": 0,
 			"pivotY": 0,
-			"fieldDefs": [
-				{
-					"identifier": "WanderZoneId",
-					"doc": "Zone the NPC can wander in.",
-					"__type": "Int",
-					"uid": 11,
-					"type": "F_Int",
-					"isArray": false,
-					"canBeNull": false,
-					"arrayMinLength": null,
-					"arrayMaxLength": null,
-					"editorDisplayMode": "Hidden",
-					"editorDisplayScale": 1,
-					"editorDisplayPos": "Above",
-					"editorLinkStyle": "StraightArrow",
-					"editorDisplayColor": null,
-					"editorAlwaysShow": false,
-					"editorShowInWorld": true,
-					"editorCutLongValues": true,
-					"editorTextSuffix": null,
-					"editorTextPrefix": null,
-					"useForSmartColor": false,
-					"exportToToc": false,
-					"searchable": false,
-					"min": null,
-					"max": null,
-					"regex": null,
-					"acceptFileTypes": null,
-					"defaultOverride": null,
-					"textLanguageMode": null,
-					"symmetricalRef": false,
-					"autoChainRef": true,
-					"allowOutOfLevelRef": true,
-					"allowedRefs": "OnlySame",
-					"allowedRefsEntityUid": null,
-					"allowedRefTags": [],
-					"tilesetUid": null
-				}
-			]
+			"fieldDefs": []
 		},
 		{
 			"identifier": "WanderZone",
@@ -350,8 +312,8 @@
 			"maxHeight": null,
 			"keepAspectRatio": false,
 			"tileOpacity": 1,
-			"fillOpacity": 1,
-			"lineOpacity": 1,
+			"fillOpacity": 0.25,
+			"lineOpacity": 0.3,
 			"hollow": false,
 			"color": "#E6BBED",
 			"renderMode": "Rectangle",
@@ -366,45 +328,7 @@
 			"limitBehavior": "MoveLastOne",
 			"pivotX": 0,
 			"pivotY": 0,
-			"fieldDefs": [
-				{
-					"identifier": "Id",
-					"doc": null,
-					"__type": "Int",
-					"uid": 13,
-					"type": "F_Int",
-					"isArray": false,
-					"canBeNull": false,
-					"arrayMinLength": null,
-					"arrayMaxLength": null,
-					"editorDisplayMode": "Hidden",
-					"editorDisplayScale": 1,
-					"editorDisplayPos": "Above",
-					"editorLinkStyle": "StraightArrow",
-					"editorDisplayColor": null,
-					"editorAlwaysShow": false,
-					"editorShowInWorld": true,
-					"editorCutLongValues": true,
-					"editorTextSuffix": null,
-					"editorTextPrefix": null,
-					"useForSmartColor": false,
-					"exportToToc": false,
-					"searchable": false,
-					"min": null,
-					"max": null,
-					"regex": null,
-					"acceptFileTypes": null,
-					"defaultOverride": null,
-					"textLanguageMode": null,
-					"symmetricalRef": false,
-					"autoChainRef": true,
-					"allowOutOfLevelRef": true,
-					"allowedRefs": "OnlySame",
-					"allowedRefsEntityUid": null,
-					"allowedRefTags": [],
-					"tilesetUid": null
-				}
-			]
+			"fieldDefs": []
 		}
 	], "tilesets": [], "enums": [], "externalEnums": [], "levelFields": [] },
 	"levels": [
@@ -508,7 +432,7 @@
 							"__worldY": 64
 						},
 						{
-							"__identifier": "Dummy",
+							"__identifier": "DummyAction",
 							"__grid": [9,5],
 							"__pivot": [0,0],
 							"__tags": [],
@@ -524,22 +448,6 @@
 							"__worldY": 80
 						},
 						{
-							"__identifier": "DummyNpc",
-							"__grid": [9,8],
-							"__pivot": [0,0],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#D743AB",
-							"iid": "d493ea30-ac70-11f0-8f19-21611402f945",
-							"width": 16,
-							"height": 16,
-							"defUid": 10,
-							"px": [144,128],
-							"fieldInstances": [{ "__identifier": "WanderZoneId", "__type": "Int", "__value": 1, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [1] }] }],
-							"__worldX": 144,
-							"__worldY": 128
-						},
-						{
 							"__identifier": "WanderZone",
 							"__grid": [7,7],
 							"__pivot": [0,0],
@@ -547,13 +455,29 @@
 							"__tile": null,
 							"__smartColor": "#E6BBED",
 							"iid": "f1a2e740-d380-11f0-b427-1d8d277d5f49",
-							"width": 80,
-							"height": 64,
+							"width": 64,
+							"height": 48,
 							"defUid": 12,
 							"px": [112,112],
-							"fieldInstances": [{ "__identifier": "Id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 13, "realEditorValues": [] }],
+							"fieldInstances": [],
 							"__worldX": 112,
 							"__worldY": 112
+						},
+						{
+							"__identifier": "DummyNpc",
+							"__grid": [9,8],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#D743AB",
+							"iid": "f4229070-d380-11f0-b427-45fb6a0c904a",
+							"width": 16,
+							"height": 16,
+							"defUid": 10,
+							"px": [144,128],
+							"fieldInstances": [],
+							"__worldX": 144,
+							"__worldY": 128
 						}
 					]
 				},

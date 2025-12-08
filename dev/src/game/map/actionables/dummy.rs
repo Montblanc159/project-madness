@@ -3,14 +3,14 @@ use bevy_ecs_ldtk::EntityInstance;
 
 use crate::game::map::{GRID_SIZE, utils};
 
-const IDENTIFIER: &str = "Dummy";
+const IDENTIFIER: &str = "DummyAction";
 
 #[derive(Component)]
 struct DummyAction;
 
 impl super::Action for DummyAction {
     fn activate(&self) {
-        println!("Dummy activated");
+        println!("Dummy action activated");
     }
 }
 

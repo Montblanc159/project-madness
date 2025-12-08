@@ -6,10 +6,11 @@ use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
 use crate::game::map::{GRID_SIZE, utils};
 
 mod portals;
+pub mod wander_zones;
 
 #[derive(Default, Resource)]
-struct Zones<T: Component> {
-    locations: HashMap<GridCoords, T>,
+pub struct Zones<T: Component> {
+    pub locations: HashMap<GridCoords, T>,
 }
 
 trait Zone {
@@ -24,7 +25,7 @@ impl<T: Component> Zones<T> {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(portals::plugin);
+    app.add_plugins((portals::plugin, wander_zones::plugin));
 }
 
 fn empty_zones_cache<T: Component>(

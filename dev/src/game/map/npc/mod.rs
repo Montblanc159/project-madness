@@ -10,6 +10,7 @@ use crate::game::{
     map::{
         GRID_SIZE,
         colliders::{Collider, LevelColliders},
+        zones::{Zones, wander_zones::WanderZone},
     },
     player::JITTER_THRESHOLD,
     tick::{MainTick, MainTickCounter, TICK_DELTA},
@@ -76,6 +77,7 @@ fn wander<T: Component + Npc>(
     level_colliders: Res<LevelColliders>,
     main_tick: Res<MainTick>,
     main_tick_counter: Res<MainTickCounter>,
+    wandering_zones: Res<Zones<WanderZone>>,
 ) {
     if main_tick.timer.just_finished() && main_tick_counter.value % 4 == 0 {
         let mut rng = rand::rng();
@@ -105,7 +107,9 @@ fn wander<T: Component + Npc>(
                     *grid_coords - movement_vector.into()
                 };
 
-                if !level_colliders.in_collider(&destination) {
+                if !level_colliders.in_collider(&destination)
+                    && wandering_zones.activated(&destination)
+                {
                     *grid_coords = destination;
                 }
             }
