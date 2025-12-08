@@ -67,17 +67,20 @@ pub fn full_span_grid_coords(
     grid_coords_from_entity_size(origin_grid_coords, width, height, grid_size)
 }
 
-pub struct Results {
+pub struct EntityFieldsUnwrapped {
     pub strings: HashMap<String, String>,
     pub floats: HashMap<String, f32>,
     pub integers: HashMap<String, i32>,
     pub bools: HashMap<String, bool>,
 }
 
-pub fn get_fields(entity_instance: &EntityInstance, identifiers: Vec<&str>) -> Results {
+pub fn get_fields(
+    entity_instance: &EntityInstance,
+    identifiers: Vec<&str>,
+) -> EntityFieldsUnwrapped {
     let mut fields_iter = entity_instance.field_instances.iter();
 
-    let mut results = Results {
+    let mut results = EntityFieldsUnwrapped {
         strings: HashMap::new(),
         floats: HashMap::new(),
         integers: HashMap::new(),

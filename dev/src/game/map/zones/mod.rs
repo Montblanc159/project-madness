@@ -1,13 +1,20 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use bevy_ecs_ldtk::{GridCoords, LevelEvent};
+use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
+
+use crate::game::map::{GRID_SIZE, utils};
 
 mod portals;
 
 #[derive(Default, Resource)]
 struct Zones<T: Component> {
     locations: HashMap<GridCoords, T>,
+}
+
+trait Zone {
+    fn identifier() -> String;
+    fn new(entity_instance: &EntityInstance) -> impl Bundle;
 }
 
 impl<T: Component> Zones<T> {
@@ -40,6 +47,44 @@ fn remove_zones<T: Component>(
         if let LevelEvent::Despawned(_) = level_event {
             for entity in zones {
                 commands.entity(entity).despawn();
+            }
+        }
+    }
+}
+
+fn spawn_zones<T: Component + Zone>(
+    mut commands: Commands,
+    new_entity_instances: Query<(&EntityInstance, &Transform), Added<EntityInstance>>,
+) {
+    for (entity_instance, transform) in new_entity_instances.iter() {
+        if &entity_instance.identifier == &T::identifier() {
+            let full_span_grid_coords = utils::full_span_grid_coords(
+                entity_instance.width,
+                entity_instance.height,
+                transform.translation,
+                GRID_SIZE,
+            );
+
+            for grid_coords in full_span_grid_coords {
+                let translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                    grid_coords,
+                    IVec2::splat(GRID_SIZE),
+                )
+                .extend(transform.translation.z);
+
+                commands.spawn((
+                    Transform {
+                        scale: Vec3 {
+                            x: 1.,
+                            y: 1.,
+                            z: 1.,
+                        },
+                        translation: translation,
+                        ..*transform
+                    },
+                    T::new(entity_instance),
+                    grid_coords,
+                ));
             }
         }
     }

@@ -2,9 +2,12 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 use crate::game::{
-    map::{CurrentLevelInfos, GRID_SIZE, utils, zones::Zones},
+    map::{CurrentLevelInfos, utils, zones::Zones},
     player::{Player, Teleported},
 };
+
+const IDENTIFIER: &str = "Portal";
+const FIELDS: [&str; 1] = ["To"];
 
 #[derive(Component, Default, Clone, Debug)]
 struct Portal {
@@ -20,6 +23,24 @@ impl Zones<Portal> {
     }
 }
 
+impl super::Zone for Portal {
+    fn identifier() -> String {
+        IDENTIFIER.into()
+    }
+
+    fn new(entity_instance: &EntityInstance) -> impl Bundle {
+        let fields = utils::get_fields(entity_instance, FIELDS.to_vec());
+
+        if let Some(to_field) = fields.strings.get("To") {
+            Portal {
+                to: to_field.into(),
+            }
+        } else {
+            panic!("To field not found on entity instance")
+        }
+    }
+}
+
 pub fn plugin(app: &mut App) {
     app.insert_resource(Zones::<Portal> {
         ..Default::default()
@@ -30,7 +51,7 @@ pub fn plugin(app: &mut App) {
         (
             super::empty_zones_cache::<Portal>,
             super::remove_zones::<Portal>,
-            spawn_portals,
+            super::spawn_zones::<Portal>,
             super::cache_zones::<Portal>,
             spawn_player_on_portal,
             activate,
@@ -38,50 +59,6 @@ pub fn plugin(app: &mut App) {
         )
             .chain(),
     );
-}
-
-fn spawn_portals(
-    mut commands: Commands,
-    new_entity_instances: Query<(&EntityInstance, &Transform), Added<EntityInstance>>,
-) {
-    for (entity_instance, transform) in new_entity_instances.iter() {
-        if &entity_instance.identifier == &"Portal".to_string() {
-            let fields = utils::get_fields(entity_instance, vec!["To"]);
-
-            if let Some(to_field) = fields.strings.get("To") {
-                let full_span_grid_coords = utils::full_span_grid_coords(
-                    entity_instance.width,
-                    entity_instance.height,
-                    transform.translation,
-                    GRID_SIZE,
-                );
-
-                for grid_coords in full_span_grid_coords {
-                    let translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
-                        grid_coords,
-                        IVec2::splat(GRID_SIZE),
-                    )
-                    .extend(transform.translation.z);
-
-                    commands.spawn((
-                        Transform {
-                            scale: Vec3 {
-                                x: 1.,
-                                y: 1.,
-                                z: 1.,
-                            },
-                            translation: translation,
-                            ..*transform
-                        },
-                        Portal {
-                            to: to_field.clone(),
-                        },
-                        grid_coords,
-                    ));
-                }
-            }
-        }
-    }
 }
 
 fn activate(

@@ -19,6 +19,8 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 - refacto colliders ? -> linked to make npc collide - OK
 - refacto portals -> OK
 
+- dynamic spawning of zones/actionables -> insert named component on `Added<EntityInstance>`, hook on `Added<NamedComponent>` to spawn zones/actionables instead of directly hooking to `Added<EntityInstance>` => Zones/actions will now be able to be spawned by, for example, NPCs
+
 ### NPCs
 - add npcs - OK
 - make them collide - OK
