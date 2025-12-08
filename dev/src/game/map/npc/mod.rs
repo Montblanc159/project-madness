@@ -12,7 +12,7 @@ use crate::game::{
         colliders::{Collider, LevelColliders},
     },
     player::JITTER_THRESHOLD,
-    tick::{MainTick, TICK_DELTA},
+    tick::{MainTick, MainTickCounter, TICK_DELTA},
 };
 
 mod dummy_npc;
@@ -75,8 +75,9 @@ fn wander<T: Component + Npc>(
     npc: Query<&mut GridCoords, With<T>>,
     level_colliders: Res<LevelColliders>,
     main_tick: Res<MainTick>,
+    main_tick_counter: Res<MainTickCounter>,
 ) {
-    if main_tick.timer.just_finished() {
+    if main_tick.timer.just_finished() && main_tick_counter.value % 4 == 0 {
         let mut rng = rand::rng();
         let nums: Vec<i32> = (0..2).collect();
 

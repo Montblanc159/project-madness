@@ -25,7 +25,7 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 - add npcs - OK
 - make them collide - OK
 - make them wander - OK
-    - Slow wandering
+    - Slow wandering - OK
     - add a zone to limit wandering ? (clamp)
 - make them talk - dialogue system with ink
 
