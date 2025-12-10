@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 
-use crate::game::camera::post_process_shaders::PostProcessSettings;
+use crate::game::camera::post_processing_shaders::level_transition_shader::{
+    self, LevelTransitionShaderSettings,
+};
 
-mod post_process_shaders;
+mod post_processing_shaders;
 
 #[derive(Component)]
 #[require(Camera2d)]
@@ -13,7 +15,7 @@ pub struct MainCamera;
 pub struct CameraTarget;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(post_process_shaders::plugin);
+    app.add_plugins(level_transition_shader::plugin);
     app.add_systems(Startup, initialize_camera);
     app.add_systems(Update, lock_camera_on_target);
 }
@@ -36,7 +38,7 @@ fn initialize_camera(mut commands: Commands, camera_target: Query<&Transform, Wi
             },
             ..OrthographicProjection::default_2d()
         }),
-        PostProcessSettings {
+        LevelTransitionShaderSettings {
             time: 0.0,
             ..default()
         },

@@ -1,4 +1,4 @@
-const CELLS = 16.0;
+const CELLS = 160;
 const STEPS = 50.0;
 const COLOR1 = vec3(0.0, 0.0, 0.0);
 const COLOR2 = vec3(0.2, 0.2, 0.2);

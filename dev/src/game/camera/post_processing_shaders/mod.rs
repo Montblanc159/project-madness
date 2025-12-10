@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::marker::PhantomData;
 
 use bevy::{
     core_pipeline::{
@@ -18,18 +18,25 @@ use bevy::{
         },
         render_resource::{
             binding_types::{sampler, texture_2d, uniform_buffer},
+            encase::private::WriteInto,
             *,
         },
         renderer::{RenderContext, RenderDevice},
         view::ViewTarget,
     },
 };
-use bevy_ecs_ldtk::LevelEvent;
 
-/// This example uses a shader source file from the assets subdirectory
-const SHADER_ASSET_PATH: &str = "shaders/level_transition.wgsl";
+pub mod level_transition_shader;
 
-pub fn plugin(app: &mut App) {
+pub trait ShaderAsset {
+    fn shader_asset_path() -> String;
+}
+
+pub fn plugin<
+    T: Component + Default + Clone + Copy + ExtractComponent + ShaderType + WriteInto + ShaderAsset,
+>(
+    app: &mut App,
+) {
     app.add_plugins((
         // The settings will be a component that lives in the main world but will
         // be extracted to the render world every frame.
@@ -37,18 +44,12 @@ pub fn plugin(app: &mut App) {
         // This plugin will take care of extracting it automatically.
         // It's important to derive [`ExtractComponent`] on [`PostProcessingSettings`]
         // for this plugin to work correctly.
-        ExtractComponentPlugin::<PostProcessSettings>::default(),
+        ExtractComponentPlugin::<T>::default(),
         // The settings will also be the data used in the shader.
         // This plugin will prepare the component for the GPU by creating a uniform buffer
         // and writing the data to that buffer every frame.
-        UniformComponentPlugin::<PostProcessSettings>::default(),
+        UniformComponentPlugin::<T>::default(),
     ));
-
-    app.insert_resource(TransitionTimer {
-        value: Timer::new(Duration::from_secs_f32(0.5), TimerMode::Once),
-    });
-
-    app.add_systems(Update, update_settings);
 
     // We need to get the render app from the main app
     let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
@@ -57,7 +58,7 @@ pub fn plugin(app: &mut App) {
 
     // RenderStartup runs once on startup after all plugins are built
     // It is useful to initialize data that will only live in the RenderApp
-    render_app.add_systems(RenderStartup, init_post_process_pipeline);
+    render_app.add_systems(RenderStartup, init_post_process_pipeline::<T>);
 
     render_app
         // Bevy's renderer uses a render graph which is a collection of nodes in a directed acyclic graph.
@@ -73,7 +74,7 @@ pub fn plugin(app: &mut App) {
         //
         // The [`ViewNodeRunner`] is a special [`Node`] that will automatically run the node for each view
         // matching the [`ViewQuery`]
-        .add_render_graph_node::<ViewNodeRunner<PostProcessNode>>(
+        .add_render_graph_node::<ViewNodeRunner<PostProcessNode<T>>>(
             // Specify the label of the graph, in this case we want the graph for 3d
             Core2d,
             // It also needs the label of the node
@@ -96,21 +97,26 @@ struct PostProcessLabel;
 
 // The post process node used for the render graph
 #[derive(Default)]
-struct PostProcessNode;
+struct PostProcessNode<T> {
+    marker: PhantomData<T>,
+}
 
 // The ViewNode trait is required by the ViewNodeRunner
-impl ViewNode for PostProcessNode {
+impl<
+    T: Component + Default + Clone + Copy + ExtractComponent + ShaderType + WriteInto + ShaderAsset,
+> ViewNode for PostProcessNode<T>
+{
     // The node needs a query to gather data from the ECS in order to do its rendering,
     // but it's not a normal system so we need to define it manually.
     //
     // This query will only run on the view entity
     type ViewQuery = (
         &'static ViewTarget,
-        // This makes sure the node only runs on cameras with the PostProcessSettings component
-        &'static PostProcessSettings,
+        // This makes sure the node only runs on cameras with the T component
+        &'static T,
         // As there could be multiple post processing components sent to the GPU (one per camera),
         // we need to get the index of the one that is associated with the current view.
-        &'static DynamicUniformIndex<PostProcessSettings>,
+        &'static DynamicUniformIndex<T>,
     );
 
     // Runs the node logic
@@ -143,7 +149,7 @@ impl ViewNode for PostProcessNode {
         };
 
         // Get the settings uniform binding
-        let settings_uniforms = world.resource::<ComponentUniforms<PostProcessSettings>>();
+        let settings_uniforms = world.resource::<ComponentUniforms<T>>();
         let Some(settings_binding) = settings_uniforms.uniforms().binding() else {
             return Ok(());
         };
@@ -215,12 +221,9 @@ struct PostProcessPipeline {
     pipeline_id: CachedRenderPipelineId,
 }
 
-#[derive(Resource)]
-struct TransitionTimer {
-    value: Timer,
-}
-
-fn init_post_process_pipeline(
+fn init_post_process_pipeline<
+    T: Component + Default + Clone + Copy + ExtractComponent + ShaderType + ShaderAsset,
+>(
     mut commands: Commands,
     render_device: Res<RenderDevice>,
     asset_server: Res<AssetServer>,
@@ -239,7 +242,7 @@ fn init_post_process_pipeline(
                 // The sampler that will be used to sample the screen texture
                 sampler(SamplerBindingType::Filtering),
                 // The settings uniform that will control the effect
-                uniform_buffer::<PostProcessSettings>(true),
+                uniform_buffer::<T>(true),
             ),
         ),
     );
@@ -247,7 +250,7 @@ fn init_post_process_pipeline(
     let sampler = render_device.create_sampler(&SamplerDescriptor::default());
 
     // Get the shader handle
-    let shader = asset_server.load(SHADER_ASSET_PATH);
+    let shader = asset_server.load(T::shader_asset_path());
     // This will setup a fullscreen triangle for the vertex state.
     let vertex_state = fullscreen_shader.to_vertex_state();
     let pipeline_id = pipeline_cache
@@ -274,34 +277,4 @@ fn init_post_process_pipeline(
         sampler,
         pipeline_id,
     });
-}
-
-// This is the component that will get passed to the shader
-#[derive(Component, Default, Clone, Copy, ExtractComponent, ShaderType)]
-pub struct PostProcessSettings {
-    pub time: f32,
-    // WebGL2 structs must be 16 byte aligned.
-    #[cfg(feature = "webgl2")]
-    _webgl2_padding: Vec3,
-}
-
-fn update_settings(
-    mut settings: Query<&mut PostProcessSettings>,
-    mut timer: ResMut<TransitionTimer>,
-    time: Res<Time>,
-    mut level_event: MessageReader<LevelEvent>,
-) {
-    for event in level_event.read() {
-        if let LevelEvent::Despawned(_) = event {
-            timer.value.reset();
-        }
-    }
-
-    if !timer.value.just_finished() {
-        for mut setting in &mut settings {
-            // This will then be extracted to the render world and uploaded to the GPU automatically by the [`UniformComponentPlugin`]
-            setting.time = timer.value.elapsed_secs();
-            timer.value.tick(time.delta());
-        }
-    }
 }
