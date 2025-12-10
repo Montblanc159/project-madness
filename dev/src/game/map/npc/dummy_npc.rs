@@ -9,6 +9,12 @@ const IDENTIFIER: &str = "DummyNpc";
 #[derive(Component)]
 struct DummyNpc;
 
+#[derive(Bundle)]
+struct DummyNpcBundle {
+    dummy_npc: DummyNpc,
+    wanderer: super::Wanderer,
+}
+
 impl super::Npc for DummyNpc {
     fn identifier() -> String {
         IDENTIFIER.to_string()
@@ -22,7 +28,10 @@ impl super::Npc for DummyNpc {
     }
 
     fn new() -> impl Bundle {
-        DummyNpc
+        DummyNpcBundle {
+            dummy_npc: DummyNpc,
+            wanderer: super::Wanderer,
+        }
     }
 }
 
@@ -32,7 +41,6 @@ pub fn plugin(app: &mut App) {
         (
             super::despawn_npc::<DummyNpc>,
             super::spawn_npc::<DummyNpc>,
-            super::wander::<DummyNpc>,
             super::update_npc_position::<DummyNpc>,
             activate,
         ),

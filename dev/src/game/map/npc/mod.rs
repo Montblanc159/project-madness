@@ -20,14 +20,18 @@ mod dummy_npc;
 
 const NPC_Z_DEPTH: f32 = 2.;
 
-pub fn plugin(app: &mut App) {
-    app.add_plugins(dummy_npc::plugin);
-}
-
 trait Npc {
     fn identifier() -> String;
     fn aseslice(server: &Res<AssetServer>) -> AseSlice;
     fn new() -> impl Bundle;
+}
+
+#[derive(Component)]
+struct Wanderer;
+
+pub fn plugin(app: &mut App) {
+    app.add_plugins(dummy_npc::plugin);
+    app.add_systems(Update, wander);
 }
 
 fn spawn_npc<T: Component + Npc>(
@@ -72,8 +76,8 @@ fn despawn_npc<T: Component + Npc>(
     }
 }
 
-fn wander<T: Component + Npc>(
-    npc: Query<&mut GridCoords, With<T>>,
+fn wander(
+    npc: Query<&mut GridCoords, With<Wanderer>>,
     level_colliders: Res<LevelColliders>,
     main_tick: Res<MainTick>,
     main_tick_counter: Res<MainTickCounter>,
