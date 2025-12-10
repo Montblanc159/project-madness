@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 
+use crate::game::camera::post_process_shaders::PostProcessSettings;
+
+mod post_process_shaders;
+
 #[derive(Component)]
 #[require(Camera2d)]
 pub struct MainCamera;
@@ -9,6 +13,7 @@ pub struct MainCamera;
 pub struct CameraTarget;
 
 pub fn plugin(app: &mut App) {
+    app.add_plugins(post_process_shaders::plugin);
     app.add_systems(Startup, initialize_camera);
     app.add_systems(Update, lock_camera_on_target);
 }
@@ -31,6 +36,10 @@ fn initialize_camera(mut commands: Commands, camera_target: Query<&Transform, Wi
             },
             ..OrthographicProjection::default_2d()
         }),
+        PostProcessSettings {
+            time: 0.0,
+            ..default()
+        },
         Transform::from_translation(target_transform.translation),
     ));
 }
