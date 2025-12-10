@@ -10,6 +10,7 @@ Thicken the plot
 ## DEV
 ### Camera
 - Clamp to sides of map ??
+- transition when changing level
 
 ### Actions
 Actions based on last direction +1 gridcoords with "spacebar" - OK
@@ -26,7 +27,7 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 - make them collide - OK
 - make them wander - OK
     - Slow wandering - OK
-    - add a zone to limit wandering ? (clamp)
+    - add a zone to limit wandering ? (clamp) - OK
 - make them talk - dialogue system with ink
 
 
