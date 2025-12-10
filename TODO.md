@@ -10,7 +10,7 @@ Thicken the plot
 ## DEV
 ### Camera
 - Clamp to sides of map ??
-- transition when changing level
+- transition when changing level - OK
 
 ### Actions
 Actions based on last direction +1 gridcoords with "spacebar" - OK
@@ -19,6 +19,8 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 ### Map hierarchy
 - refacto colliders ? -> linked to make npc collide - OK
 - refacto portals -> OK
+
+- levels in file hierarchy for level specific logic
 
 - dynamic spawning of zones/actionables -> insert named component on `Added<EntityInstance>`, hook on `Added<NamedComponent>` to spawn zones/actionables instead of directly hooking to `Added<EntityInstance>` => Zones/actions will now be able to be spawned by, for example, NPCs
 
