@@ -1,7 +1,7 @@
-const CELLS = 160;
+const CELLS = 300;
 const STEPS = 50.0;
 const COLOR1 = vec3(0.0, 0.0, 0.0);
-const COLOR2 = vec3(0.2, 0.2, 0.2);
+const COLOR2 = vec3(0.01, 0.01, 0.01);
 
 #import bevy_core_pipeline::fullscreen_vertex_shader::FullscreenVertexOutput
 

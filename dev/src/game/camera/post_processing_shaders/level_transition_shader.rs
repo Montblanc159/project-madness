@@ -35,7 +35,12 @@ pub fn plugin(app: &mut App) {
     app.insert_resource(TransitionTimer {
         value: Timer::new(Duration::from_secs_f32(0.5), TimerMode::Once),
     });
+    app.add_systems(Startup, reset_timer);
     app.add_systems(Update, update_settings);
+}
+
+fn reset_timer(mut timer: ResMut<TransitionTimer>) {
+    timer.value.reset();
 }
 
 fn update_settings(
