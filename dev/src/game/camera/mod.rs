@@ -33,7 +33,7 @@ pub fn spawn_camera(mut commands: Commands, camera_target: Query<&Transform, Wit
             ..Default::default()
         },
         Projection::Orthographic(OrthographicProjection {
-            scale: 1.5,
+            scale: 0.1,
             ..OrthographicProjection::default_2d()
         }),
         LevelTransitionShaderSettings {
