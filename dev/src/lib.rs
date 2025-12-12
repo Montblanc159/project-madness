@@ -16,7 +16,8 @@ impl Plugin for AppPlugin {
                     primary_window: (Some(Window {
                         mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
                         title: "Project madness".into(),
-                        resolution: WindowResolution::new(240, 160).with_scale_factor_override(1.),
+                        resolution: WindowResolution::new(240, 160)
+                            .with_scale_factor_override(15.1),
                         ..default()
                     })),
                     ..default()
