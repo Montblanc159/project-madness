@@ -13,6 +13,7 @@ struct DummyNpc;
 struct DummyNpcBundle {
     dummy_npc: DummyNpc,
     wanderer: super::Wanderer,
+    talkable: super::Talkable,
 }
 
 impl super::Npc for DummyNpc {
@@ -31,6 +32,7 @@ impl super::Npc for DummyNpc {
         DummyNpcBundle {
             dummy_npc: DummyNpc,
             wanderer: super::Wanderer,
+            talkable: super::Talkable,
         }
     }
 }

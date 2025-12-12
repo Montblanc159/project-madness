@@ -39,21 +39,53 @@ fn spawn_dialog_box(mut commands: Commands, asset_server: Res<AssetServer>) {
         Node {
             position_type: PositionType::Absolute,
             bottom: px(0),
+            left: px(0),
+            right: px(0),
+            aspect_ratio: Some(240. / 64.),
             display: Display::None,
+            padding: UiRect {
+                left: px(super::DEFAULT_PADDING),
+                right: px(super::DEFAULT_PADDING),
+                top: px(super::DEFAULT_PADDING - 7),
+                bottom: px(super::DEFAULT_PADDING),
+            },
             ..Default::default()
         },
         ImageNode {
             image: asset_server.load("textures/ui/dialog-box.png"),
-            image_mode: NodeImageMode::Stretch,
             ..Default::default()
         },
         DialogContainer,
     ));
 
     entity.with_children(|child_commands| {
-        child_commands.spawn((Text::new("Image"), TextColor(BLACK.into()), DialogImage));
-        child_commands.spawn((Text::new("Name"), TextColor(BLACK.into()), DialogSource));
-        child_commands.spawn((Text::new("Body"), TextColor(BLACK.into()), DialogBody));
+        child_commands.spawn((
+            Text::new("Image"),
+            TextFont {
+                font_size: super::DEFAULT_FONT_SIZE,
+                ..default()
+            },
+            TextColor(BLACK.into()),
+            DialogImage,
+        ));
+        child_commands.spawn((
+            Text::new("Name"),
+            TextFont {
+                font_size: super::DEFAULT_FONT_SIZE,
+                ..default()
+            },
+            TextColor(BLACK.into()),
+            DialogSource,
+        ));
+        child_commands.spawn((
+            Text::new("Body"),
+            TextFont {
+                font_size: super::DEFAULT_FONT_SIZE,
+                ..default()
+            },
+            TextColor(BLACK.into()),
+            DialogBody,
+        ));
     });
 }
 

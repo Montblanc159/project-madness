@@ -12,8 +12,9 @@ use crate::game::{
         colliders::{Collider, LevelColliders},
         zones::{Zones, wander_zones::WanderZone},
     },
-    player::JITTER_THRESHOLD,
+    player::{Activate, JITTER_THRESHOLD},
     tick::{MainTick, MainTickCounter, TICK_DELTA},
+    ui::dialogs::DialogEvent,
 };
 
 mod dummy_npc;
@@ -29,9 +30,15 @@ trait Npc {
 #[derive(Component)]
 struct Wanderer;
 
+#[derive(Component)]
+struct Talkable;
+
+// #[derive(Component)]
+// struct DialogFilePath(String);
+
 pub fn plugin(app: &mut App) {
     app.add_plugins(dummy_npc::plugin);
-    app.add_systems(Update, wander);
+    app.add_systems(Update, (wander, talk));
 }
 
 fn spawn_npc<T: Component + Npc>(
@@ -142,5 +149,24 @@ fn update_npc_position<T: Component + Npc>(
         );
 
         commands.entity(entity).insert(TweenAnim::new(tween));
+    }
+}
+
+fn talk(
+    mut activate_event: MessageReader<Activate>,
+    // asset_server: Res<AssetServer>,
+    mut dialog_event: MessageWriter<DialogEvent>,
+    talkable_npc: Query<(&GridCoords), With<Talkable>>,
+) {
+    for event in activate_event.read() {
+        for grid_coords in talkable_npc {
+            if event.grid_coords == (*grid_coords).into() {
+                dialog_event.write(DialogEvent {
+                    source: "foo".into(),
+                    image: "foobar".into(),
+                    body: "bar".into(),
+                });
+            }
+        }
     }
 }
