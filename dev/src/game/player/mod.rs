@@ -6,6 +6,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
+use crate::game::dialog_system::{DialogEndedEvent, DialogTriggeredEvent};
 
 use super::camera::CameraTarget;
 use super::map::{
@@ -17,6 +18,47 @@ use super::tick::TICK_DELTA;
 pub const JITTER_THRESHOLD: f32 = 0.015;
 const ACTION_Z_DEPTH: f32 = 2.;
 const PLAYER_Z_DEPTH: f32 = 2.;
+
+#[derive(Component, Default)]
+enum MovementState {
+    #[default]
+    Free,
+    Locked,
+}
+
+#[derive(Component, Default)]
+enum ActionState {
+    #[default]
+    Free,
+    Locked,
+}
+
+struct PlayerStates {
+    movement_state: MovementState,
+    action_state: ActionState,
+}
+
+#[derive(Component, Default)]
+enum PlayerStance {
+    #[default]
+    Roaming,
+    Talking,
+}
+
+impl PlayerStance {
+    fn to_player_states(&self) -> PlayerStates {
+        match self {
+            Self::Roaming => PlayerStates {
+                movement_state: MovementState::Free,
+                action_state: ActionState::Free,
+            },
+            Self::Talking => PlayerStates {
+                movement_state: MovementState::Locked,
+                action_state: ActionState::Locked,
+            },
+        }
+    }
+}
 
 #[derive(Resource)]
 pub struct WalkCycleTimer {
@@ -67,6 +109,9 @@ pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
+            set_talking_stance,
+            remove_talking_stance,
+            update_player_states,
             display_action_zone,
             spawn_player,
             set_action_grid_coords,
@@ -109,6 +154,9 @@ fn spawn_player(
                     display: None,
                 },
                 Facing::South,
+                PlayerStance::Roaming,
+                MovementState::Free,
+                ActionState::Free,
             ));
         }
     }
@@ -122,13 +170,17 @@ fn init_walk_cycle_timer(mut commands: Commands) {
 
 fn player_movement_input(
     keys: Res<PlayerInputs>,
-    player_velocities: Query<(&mut Velocity, &mut Facing), With<Player>>,
+    player_velocities: Query<(&mut Velocity, &mut Facing, &MovementState), With<Player>>,
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
 ) {
-    for (mut velocity, mut facing) in player_velocities {
+    for (mut velocity, mut facing, player_state) in player_velocities {
         velocity.value = IVec2 {
             ..Default::default()
         };
+
+        if let MovementState::Locked = player_state {
+            return;
+        }
 
         if keys.pressed_actions.contains(&PlayerAction::Left) {
             walk_cycle_timer.timer.unpause();
@@ -317,15 +369,53 @@ fn update_display_action_zone(
 
 fn activate(
     keys: Res<PlayerInputs>,
-    players: Query<(Entity, &ActionZone), With<Player>>,
+    players: Query<(Entity, &ActionZone, &ActionState), With<Player>>,
     mut activate_event: MessageWriter<Activate>,
 ) {
     if keys.just_pressed_actions.contains(&PlayerAction::Activate) {
-        for (entity, action_zone) in players {
-            activate_event.write(Activate {
-                _entity: entity,
-                grid_coords: action_zone.value.into(),
-            });
+        for (entity, action_zone, action_state) in players {
+            if let ActionState::Free = action_state {
+                activate_event.write(Activate {
+                    _entity: entity,
+                    grid_coords: action_zone.value.into(),
+                });
+            }
+        }
+    }
+}
+
+fn update_player_states(
+    players: Query<
+        (&PlayerStance, &mut ActionState, &mut MovementState),
+        (With<Player>, Changed<PlayerStance>),
+    >,
+) {
+    for (stance, mut action_state, mut movement_state) in players {
+        let states = stance.to_player_states();
+
+        *action_state = states.action_state;
+        *movement_state = states.movement_state;
+    }
+}
+
+fn set_talking_stance(
+    players: Query<&mut PlayerStance, With<Player>>,
+    mut dialog_event: MessageReader<DialogTriggeredEvent>,
+) {
+    for mut stance in players {
+        for _ in dialog_event.read() {
+            *stance = PlayerStance::Talking
+        }
+    }
+}
+
+fn remove_talking_stance(
+    players: Query<&mut PlayerStance, With<Player>>,
+    mut dialog_event: MessageReader<DialogEndedEvent>,
+) {
+    for mut stance in players {
+        for _ in dialog_event.read() {
+            *stance = PlayerStance::Roaming
         }
     }
 }

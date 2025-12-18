@@ -7,6 +7,7 @@ use bevy_tweening::*;
 use rand::prelude::*;
 
 use crate::game::{
+    dialog_system::DialogTriggeredEvent,
     map::{
         GRID_SIZE,
         colliders::{Collider, LevelColliders},
@@ -14,7 +15,6 @@ use crate::game::{
     },
     player::{Activate, JITTER_THRESHOLD},
     tick::{MainTick, MainTickCounter, TICK_DELTA},
-    ui::dialogs::DialogEvent,
 };
 
 mod dummy_npc;
@@ -31,10 +31,20 @@ trait Npc {
 struct Wanderer;
 
 #[derive(Component)]
+#[require(DialogFilePath, DialogState)]
 struct Talkable;
 
-// #[derive(Component)]
-// struct DialogFilePath(String);
+#[derive(Component, Default)]
+struct DialogFilePath(String);
+
+#[derive(Component, Default)]
+struct DialogState(String);
+
+#[derive(Component)]
+enum NpcStance {
+    Roaming,
+    Talking,
+}
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(dummy_npc::plugin);
@@ -55,6 +65,7 @@ fn spawn_npc<T: Component + Npc>(
                     ..entity_instance.grid.into()
                 },
                 Collider,
+                NpcStance::Roaming,
                 Transform {
                     translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
                         entity_instance.grid.into(),
@@ -84,7 +95,7 @@ fn despawn_npc<T: Component + Npc>(
 }
 
 fn wander(
-    npc: Query<&mut GridCoords, With<Wanderer>>,
+    npc: Query<(&mut GridCoords, &NpcStance), With<Wanderer>>,
     level_colliders: Res<LevelColliders>,
     main_tick: Res<MainTick>,
     main_tick_counter: Res<MainTickCounter>,
@@ -94,7 +105,11 @@ fn wander(
         let mut rng = rand::rng();
         let nums: Vec<i32> = (0..2).collect();
 
-        for mut grid_coords in npc {
+        for (mut grid_coords, stance) in npc {
+            if let NpcStance::Talking = stance {
+                return;
+            }
+
             let move_distance = nums.choose(&mut rng);
             let left_or_up = rand::random_bool(1.0 / 2.0);
             let add_or_sub = rand::random_bool(1.0 / 2.0);
@@ -154,18 +169,22 @@ fn update_npc_position<T: Component + Npc>(
 
 fn talk(
     mut activate_event: MessageReader<Activate>,
-    // asset_server: Res<AssetServer>,
-    mut dialog_event: MessageWriter<DialogEvent>,
-    talkable_npc: Query<(&GridCoords), With<Talkable>>,
+    mut dialog_event: MessageWriter<DialogTriggeredEvent>,
+    talkable_npc: Query<
+        (&GridCoords, &DialogFilePath, &DialogState, &mut NpcStance),
+        With<Talkable>,
+    >,
 ) {
-    for event in activate_event.read() {
-        for grid_coords in talkable_npc {
+    for (grid_coords, file_path, dialog_state, mut stance) in talkable_npc {
+        for event in activate_event.read() {
             if event.grid_coords == (*grid_coords).into() {
-                dialog_event.write(DialogEvent {
-                    source: "foo".into(),
-                    image: "foobar".into(),
-                    body: "bar".into(),
+                dialog_event.write(DialogTriggeredEvent {
+                    file_path: file_path.0.clone(),
+                    dialog_state: dialog_state.0.clone(),
+                    ..Default::default()
                 });
+
+                *stance = NpcStance::Talking;
             }
         }
     }

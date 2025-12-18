@@ -14,6 +14,8 @@ struct DummyNpcBundle {
     dummy_npc: DummyNpc,
     wanderer: super::Wanderer,
     talkable: super::Talkable,
+    dialog_file_path: super::DialogFilePath,
+    dialog_state: super::DialogState,
 }
 
 impl super::Npc for DummyNpc {
@@ -33,6 +35,8 @@ impl super::Npc for DummyNpc {
             dummy_npc: DummyNpc,
             wanderer: super::Wanderer,
             talkable: super::Talkable,
+            dialog_file_path: super::DialogFilePath("dialogs/dummy_npc.ink.json".into()),
+            dialog_state: super::DialogState("".into()),
         }
     }
 }
