@@ -1,3 +1,5 @@
+#!/bin/sh
+
 sh ./install-dependencies
 
 cargo build
