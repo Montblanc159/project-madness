@@ -5,6 +5,8 @@ use bevy_aseprite_ultra::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_tweening::*;
 
+use crate::game::controls::{PlayerAction, PlayerInputs};
+
 use super::camera::CameraTarget;
 use super::map::{
     GRID_SIZE,
@@ -119,7 +121,7 @@ fn init_walk_cycle_timer(mut commands: Commands) {
 }
 
 fn player_movement_input(
-    keys: Res<ButtonInput<KeyCode>>,
+    keys: Res<PlayerInputs>,
     player_velocities: Query<(&mut Velocity, &mut Facing), With<Player>>,
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
 ) {
@@ -128,7 +130,7 @@ fn player_movement_input(
             ..Default::default()
         };
 
-        if keys.pressed(KeyCode::KeyA) {
+        if keys.pressed_actions.contains(&PlayerAction::Left) {
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::West;
@@ -136,7 +138,7 @@ fn player_movement_input(
                 x: -1,
                 ..Default::default()
             }
-        } else if keys.pressed(KeyCode::KeyD) {
+        } else if keys.pressed_actions.contains(&PlayerAction::Right) {
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::East;
@@ -144,7 +146,7 @@ fn player_movement_input(
                 x: 1,
                 ..Default::default()
             }
-        } else if keys.pressed(KeyCode::KeyW) {
+        } else if keys.pressed_actions.contains(&PlayerAction::Up) {
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::North;
@@ -152,7 +154,7 @@ fn player_movement_input(
                 y: 1,
                 ..Default::default()
             }
-        } else if keys.pressed(KeyCode::KeyS) {
+        } else if keys.pressed_actions.contains(&PlayerAction::Down) {
             walk_cycle_timer.timer.unpause();
 
             *facing = Facing::South;
@@ -314,11 +316,11 @@ fn update_display_action_zone(
 }
 
 fn activate(
-    keys: Res<ButtonInput<KeyCode>>,
+    keys: Res<PlayerInputs>,
     players: Query<(Entity, &ActionZone), With<Player>>,
     mut activate_event: MessageWriter<Activate>,
 ) {
-    if keys.just_pressed(KeyCode::Space) {
+    if keys.just_pressed_actions.contains(&PlayerAction::Activate) {
         for (entity, action_zone) in players {
             activate_event.write(Activate {
                 _entity: entity,
