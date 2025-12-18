@@ -39,19 +39,27 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 ### Add items
 
 ### Add multiple input (keyboard + gamepad)
+- add player settings to change inputs dynamically
 
+### Game states
+- save system
+- menu
+- settings
+
+### Optimizations
+- Compressed assets ?
 
 ### Map based on madness level (later)
-three levels:
+four levels:
+- high on pills (easy mode)
 - normal
-- stressed (bonuses but fills easily level)
+- stressed (bonuses but fills easily madness level)
 - mad (really hard, more monsters/hallucinations)
 -> faint
 
 ### Refactors
-??
-- rethink some naming conventions
-- game hierarchy ??
+- player
+- where clauses on big generic systems
 
 ### Document
 Everything

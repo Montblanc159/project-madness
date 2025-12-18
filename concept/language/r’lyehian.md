@@ -1,0 +1,86 @@
+# R'lyehian language
+
+## Words
+
+- \- agl-(suffix) place
+- ah-generic action, e.g. greet, eat, do
+- 'ai-speak / call
+- athg-sign (contract) / agree to
+- 'bthnk-body / essence
+- bug-go
+- c--(prefix) we / our
+- ch' -cross over / travel
+- chtenff-brotherhood / society
+- ebumna-pit
+- ee-answers
+- ehye-cohesion / integrity
+- ep-after; with hai, later / then
+- f'- -(prefix) they / their
+- 'fhalma-mother
+- fhtagn-wait / sleep
+- fm'latgh-burn
+- ftaghu-skin/ boundary
+- geb-here
+- gnaiih-father
+- gof'nn-children
+- goka-grant
+- gotha-wish
+- grah'n-lost one / larva
+- h'--(prefix) it / its
+- hafh'drn-priest / summoner
+- hai-now
+- hlirgh-heretic
+- hrii-followers
+- hupadgh-born of
+- ilyaa-expect / await
+- k'yarnak-share / exchange
+- kadishtu-understand / know
+- kn'a-question
+- li'hee-on pain of
+- llll-at / beside
+- lloig-mind / psyche
+- lw'nafh-dream / transmit
+- mg-(conjunction) yet
+- mnahn' -worthless
+- n'gha-death
+- n'ghft-darkness
+- na- -(prefix) (contraction of nafl-)
+- nafl--(prefix) not / (not-present tense)
+- ng- -(prefix) (conjunction) and / then
+- nglui-threshold
+- nilgh'ri-anything / everything
+- nnn--(prefix) watch / protect
+- nog-come
+- nw-head / place
+- -nyth-(suffix) servant of
+- -og-(suffix) (emphatic)
+- ooboshu-visit
+- -or-(suffix) force from / aspect of
+- orr'e-soul / spirit
+- -oth-(suffix) native of
+- ph' - (prefix) over / beyond
+- phlegeth-realm of information
+- r'luh-secret / hidden
+- ron-religion / cult
+- s'uhn-pact
+- sgn'wahl-share space
+- shagg-realm of dreams
+- shogg-realm of darkness
+- shtunggli-notify / contact
+- shugg-realm of Earth
+- sll'ha-invite
+- stell'bsna-ask / pray for
+- syha'h-eternity
+- tharanak-promise / bring
+- throd-tremble
+- uaaah-(finish spell)
+- uh'e-people / crowd
+- uln-call /summon
+- vulgtlagln-pray to
+- vulgtm-prayer
+- wgah'n-reside in / control
+- y'hah-amen
+- y--(prefix) I / my
+- ya-I
+- -yar-(suffix) time of / moment
+- zhro-(lift spell)
