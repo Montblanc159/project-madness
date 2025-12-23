@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
 use bevy_ecs_ldtk::GridCoords;
 
-use crate::game::player::Activate;
+use crate::game::{
+    dialog_system::{DialogFilePath, DialogKnot, DialogState},
+    player::Activate,
+};
 
 const IDENTIFIER: &str = "DummyNpc";
 
@@ -14,8 +17,11 @@ struct DummyNpcBundle {
     dummy_npc: DummyNpc,
     wanderer: super::Wanderer,
     talkable: super::Talkable,
-    dialog_file_path: super::DialogFilePath,
-    dialog_state: super::DialogState,
+    dialog_file_path: DialogFilePath,
+    dialog_state: DialogState,
+    dialog_knot: DialogKnot,
+    avatar_file_path: super::AvatarFilePath,
+    npc_name: super::NpcName,
 }
 
 impl super::Npc for DummyNpc {
@@ -35,8 +41,11 @@ impl super::Npc for DummyNpc {
             dummy_npc: DummyNpc,
             wanderer: super::Wanderer,
             talkable: super::Talkable,
-            dialog_file_path: super::DialogFilePath("dialogs/dummy_npc.ink.json".into()),
-            dialog_state: super::DialogState("".into()),
+            dialog_file_path: DialogFilePath("dialogs/dummy_npc.ink.json".into()),
+            dialog_state: DialogState("".into()),
+            dialog_knot: DialogKnot("".into()),
+            avatar_file_path: super::AvatarFilePath("textures/npcs/dummy_npc_avatar.png".into()),
+            npc_name: super::NpcName("Dummy Npc".into()),
         }
     }
 }

@@ -7,7 +7,7 @@ use bevy_tweening::*;
 use rand::prelude::*;
 
 use crate::game::{
-    dialog_system::DialogTriggeredEvent,
+    dialog_system::{DialogFilePath, DialogKnot, DialogState, RunDialogEvent},
     map::{
         GRID_SIZE,
         colliders::{Collider, LevelColliders},
@@ -30,15 +30,15 @@ trait Npc {
 #[derive(Component)]
 struct Wanderer;
 
+#[derive(Component, Default)]
+pub struct AvatarFilePath(pub String);
+
+#[derive(Component, Default)]
+pub struct NpcName(pub String);
+
 #[derive(Component)]
-#[require(DialogFilePath, DialogState)]
+#[require(DialogFilePath, DialogState, DialogKnot, AvatarFilePath, NpcName)]
 struct Talkable;
-
-#[derive(Component, Default)]
-struct DialogFilePath(String);
-
-#[derive(Component, Default)]
-struct DialogState(String);
 
 #[derive(Component)]
 enum NpcStance {
@@ -169,19 +169,15 @@ fn update_npc_position<T: Component + Npc>(
 
 fn talk(
     mut activate_event: MessageReader<Activate>,
-    mut dialog_event: MessageWriter<DialogTriggeredEvent>,
-    talkable_npc: Query<
-        (&GridCoords, &DialogFilePath, &DialogState, &mut NpcStance),
-        With<Talkable>,
-    >,
+    mut dialog_event: MessageWriter<RunDialogEvent>,
+    talkable_npc: Query<(Entity, &GridCoords, &mut NpcStance), With<Talkable>>,
 ) {
-    for (grid_coords, file_path, dialog_state, mut stance) in talkable_npc {
+    for (entity, grid_coords, mut stance) in talkable_npc {
         for event in activate_event.read() {
             if event.grid_coords == (*grid_coords).into() {
-                dialog_event.write(DialogTriggeredEvent {
-                    file_path: file_path.0.clone(),
-                    dialog_state: dialog_state.0.clone(),
-                    ..Default::default()
+                dialog_event.write(RunDialogEvent {
+                    source_entity: entity,
+                    choice_index: None,
                 });
 
                 *stance = NpcStance::Talking;

@@ -6,7 +6,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
-use crate::game::dialog_system::{DialogEndedEvent, DialogTriggeredEvent};
+use crate::game::dialog_system::{DialogEndedEvent, RunDialogEvent};
 
 use super::camera::CameraTarget;
 use super::map::{
@@ -400,7 +400,7 @@ fn update_player_states(
 
 fn set_talking_stance(
     players: Query<&mut PlayerStance, With<Player>>,
-    mut dialog_event: MessageReader<DialogTriggeredEvent>,
+    mut dialog_event: MessageReader<RunDialogEvent>,
 ) {
     for mut stance in players {
         for _ in dialog_event.read() {

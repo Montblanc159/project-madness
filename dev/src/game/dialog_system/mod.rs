@@ -3,7 +3,10 @@ use std::{collections::HashMap, fmt::Debug, rc::Rc};
 use bevy::{asset::LoadedFolder, prelude::*};
 use bladeink::story::Story;
 
-use crate::game::custom_asset_types::ink_json::InkJson;
+use crate::game::{
+    custom_asset_types::ink_json::InkJson,
+    map::npc::{AvatarFilePath, NpcName},
+};
 
 #[derive(Resource, Default)]
 struct DialogsFolder(Handle<LoadedFolder>);
@@ -13,21 +16,30 @@ struct DialogsCache {
     dialogs: HashMap<String, String>,
 }
 
-#[derive(Message, Default)]
-pub struct DialogTriggeredEvent {
-    pub file_path: String,
-    pub dialog_state: String,
-    pub choice_index: Option<u8>,
+#[derive(Component, Default)]
+pub struct DialogFilePath(pub String);
+
+#[derive(Component, Default)]
+pub struct DialogState(pub String);
+
+#[derive(Component, Default)]
+pub struct DialogKnot(pub String);
+
+#[derive(Message)]
+pub struct RunDialogEvent {
+    pub source_entity: Entity,
+    pub choice_index: Option<usize>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DialogChoice {
-    pub index: u8,
+    pub index: usize,
     pub body: String,
 }
 
 #[derive(Message)]
 pub struct DisplayCurrentDialogEvent {
+    pub source_entity: Entity,
     pub source_name: String,
     pub image_path: String,
     pub lines: Vec<String>,
@@ -35,15 +47,25 @@ pub struct DisplayCurrentDialogEvent {
 }
 
 #[derive(Message)]
+pub struct UpdateDialogStateEvent {
+    source_entity: Entity,
+    dialog_state: String,
+}
+
+#[derive(Message)]
 pub struct DialogEndedEvent;
 
 pub fn plugin(app: &mut App) {
-    app.add_message::<DialogTriggeredEvent>();
+    app.add_message::<RunDialogEvent>();
     app.add_message::<DisplayCurrentDialogEvent>();
     app.add_message::<DialogEndedEvent>();
+    app.add_message::<UpdateDialogStateEvent>();
     app.init_resource::<DialogsCache>();
     app.add_systems(Startup, load_dialog_folder);
-    app.add_systems(Update, (cache_dialogs, next_dialog).chain());
+    app.add_systems(
+        Update,
+        (cache_dialogs, run_dialog, update_dialog_state).chain(),
+    );
 }
 
 fn load_dialog_folder(mut commands: Commands, asset_server: ResMut<AssetServer>) {
@@ -76,75 +98,108 @@ fn cache_dialogs(
     }
 }
 
-fn next_dialog(
-    mut dialog_event: MessageReader<DialogTriggeredEvent>,
+fn get_story_with_state(inkjson: &str, state: &str, knot: &str) -> Story {
+    let mut story = match Story::new(inkjson) {
+        Ok(story) => story,
+        Err(err) => panic!("Story can't be read: {:?}", err),
+    };
+
+    if !state.is_empty() {
+        story.load_state(state).expect("Could not load story state");
+    }
+
+    if !knot.is_empty() {
+        story
+            .choose_path_string(knot, true, None)
+            .expect("Could not load story knot");
+    }
+
+    story
+}
+
+fn get_lines(story: &mut Story) -> Vec<String> {
+    let mut lines = Vec::new();
+
+    while story.can_continue() {
+        if let Ok(line) = story.cont() {
+            lines.push(line);
+        }
+    }
+
+    lines
+}
+
+fn get_choices(story: &Story) -> Vec<DialogChoice> {
+    let mut choices = vec![];
+
+    for mut choice in story.get_current_choices().into_iter() {
+        let choice = Rc::make_mut(&mut choice);
+
+        choices.push(DialogChoice {
+            body: choice.text.clone(),
+            index: choice.index.clone().into_inner(),
+        });
+    }
+
+    choices
+}
+
+fn run_dialog(
+    mut dialog_event: MessageReader<RunDialogEvent>,
     mut dialog_ui_event: MessageWriter<DisplayCurrentDialogEvent>,
-    mut dialog_ended_event: MessageWriter<DialogEndedEvent>,
+    mut update_entity_event: MessageWriter<UpdateDialogStateEvent>,
+    entities: Query<(
+        &DialogFilePath,
+        &DialogState,
+        &DialogKnot,
+        &NpcName,
+        &AvatarFilePath,
+    )>,
     dialogs_cache: Res<DialogsCache>,
 ) {
     for event in dialog_event.read() {
-        if let Some(dialog) = dialogs_cache.dialogs.get(&event.file_path) {
-            let mut story = match Story::new(dialog) {
-                Ok(story) => story,
-                Err(err) => panic!("Story can't be read: {:?}", err),
-            };
+        if let Ok((file_path, dialog_state, dialog_knot, name, avatar_file_path)) =
+            entities.get(event.source_entity)
+        {
+            if let Some(dialog_file) = dialogs_cache.dialogs.get(&file_path.0) {
+                let mut story = get_story_with_state(dialog_file, &dialog_state.0, &dialog_knot.0);
 
-            if !event.dialog_state.is_empty() {
-                story
-                    .load_state(&event.dialog_state)
-                    .expect("Could not load story state");
-            }
-
-            if !story.can_continue() && story.get_current_choices().is_empty() {
-                dialog_ended_event.write(DialogEndedEvent);
-                return;
-            }
-
-            if let Some(choice_index) = event.choice_index {
-                story
-                    .choose_choice_index(choice_index as usize)
-                    .expect("Could not set story choice");
-            }
-
-            let mut lines = Vec::new();
-
-            while story.can_continue() {
-                if let Ok(line) = story.cont() {
-                    lines.push(line);
+                if let Some(choice_index) = event.choice_index {
+                    story
+                        .choose_choice_index(choice_index)
+                        .expect("Could not set story choice");
                 }
-            }
 
-            let mut choices = vec![];
+                let lines = get_lines(&mut story);
 
-            for mut choice in story.get_current_choices().into_iter() {
-                let choice = Rc::make_mut(&mut choice);
+                if let Ok(dialog_state) = story.save_state() {
+                    update_entity_event.write(UpdateDialogStateEvent {
+                        source_entity: event.source_entity,
+                        dialog_state,
+                    });
+                }
 
-                choices.push(DialogChoice {
-                    body: choice.text.clone(),
-                    index: choice.index.clone().into_inner() as u8,
+                let choices = get_choices(&story);
+
+                dialog_ui_event.write(DisplayCurrentDialogEvent {
+                    source_entity: event.source_entity,
+                    source_name: name.0.clone(),
+                    image_path: avatar_file_path.0.clone(),
+                    lines,
+                    choices,
                 });
-            }
+            };
+        }
+    }
+}
 
-            let source_name = story
-                .get_variable("sourceName")
-                .unwrap()
-                .get::<&str>()
-                .unwrap()
-                .to_string();
-
-            let image_path = story
-                .get_variable("imagePath")
-                .unwrap()
-                .get::<&str>()
-                .unwrap()
-                .to_string();
-
-            dialog_ui_event.write(DisplayCurrentDialogEvent {
-                source_name,
-                image_path,
-                lines,
-                choices,
-            });
-        };
+fn update_dialog_state(
+    mut entities: Query<&mut DialogState>,
+    mut update_event: MessageReader<UpdateDialogStateEvent>,
+) {
+    for event in update_event.read() {
+        if let Ok(mut dialog_state) = entities.get_mut(event.source_entity) {
+            dialog_state.0 = event.dialog_state.clone();
+        }
     }
 }
