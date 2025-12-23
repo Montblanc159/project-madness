@@ -7,7 +7,7 @@ use bevy_tweening::*;
 use rand::prelude::*;
 
 use crate::game::{
-    dialog_system::{DialogFilePath, DialogKnot, DialogState, RunDialogEvent},
+    dialog_system::{DialogEndedEvent, DialogFilePath, DialogKnot, DialogState, RunDialogEvent},
     map::{
         GRID_SIZE,
         colliders::{Collider, LevelColliders},
@@ -48,7 +48,7 @@ enum NpcStance {
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(dummy_npc::plugin);
-    app.add_systems(Update, (wander, talk));
+    app.add_systems(Update, (wander, talk, end_talk));
 }
 
 fn spawn_npc<T: Component + Npc>(
@@ -182,6 +182,17 @@ fn talk(
 
                 *stance = NpcStance::Talking;
             }
+        }
+    }
+}
+
+fn end_talk(
+    talking_npc: Query<&mut NpcStance, With<Talkable>>,
+    mut dialog_ended_event: MessageReader<DialogEndedEvent>,
+) {
+    for mut stance in talking_npc {
+        for _ in dialog_ended_event.read() {
+            *stance = NpcStance::Roaming;
         }
     }
 }

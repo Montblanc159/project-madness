@@ -148,6 +148,7 @@ fn run_dialog(
     mut dialog_event: MessageReader<RunDialogEvent>,
     mut dialog_ui_event: MessageWriter<DisplayCurrentDialogEvent>,
     mut update_entity_event: MessageWriter<UpdateDialogStateEvent>,
+    mut dialog_ended_event: MessageWriter<DialogEndedEvent>,
     entities: Query<(
         &DialogFilePath,
         &DialogState,
@@ -181,13 +182,17 @@ fn run_dialog(
 
                 let choices = get_choices(&story);
 
-                dialog_ui_event.write(DisplayCurrentDialogEvent {
-                    source_entity: event.source_entity,
-                    source_name: name.0.clone(),
-                    image_path: avatar_file_path.0.clone(),
-                    lines,
-                    choices,
-                });
+                if lines.is_empty() && choices.is_empty() {
+                    dialog_ended_event.write(DialogEndedEvent);
+                } else {
+                    dialog_ui_event.write(DisplayCurrentDialogEvent {
+                        source_entity: event.source_entity,
+                        source_name: name.0.clone(),
+                        image_path: avatar_file_path.0.clone(),
+                        lines,
+                        choices,
+                    });
+                }
             };
         }
     }

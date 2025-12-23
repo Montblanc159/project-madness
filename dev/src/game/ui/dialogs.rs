@@ -22,7 +22,7 @@ struct DialogImageUi;
 struct DialogSourceName;
 
 #[derive(Component)]
-struct DialogBodyUi;
+struct DialogLinesUi;
 
 #[derive(Component)]
 struct DialogChoiceUi;
@@ -40,6 +40,9 @@ struct CurrentDialogLines(HashMap<u8, String>);
 struct CurrentDialogChoices(Vec<DialogChoice>);
 
 #[derive(Component, Default)]
+struct CurrentDialogChoiceIndex(Option<usize>);
+
+#[derive(Component, Default)]
 struct CurrentDialogImage(Handle<Image>);
 
 #[derive(Component, Default)]
@@ -49,20 +52,21 @@ struct CurrentDialogSourceName(String);
 struct CurrentSourceEntity(Option<Entity>);
 
 pub fn plugin(app: &mut App) {
-    app.add_observer(select_choice);
+    app.add_observer(set_choice_index);
     app.add_systems(Startup, (spawn_dialog_box, spawn_dialog_cache));
     app.add_systems(
         Update,
         (
-            set_dialog_infos,
+            clean_dialog_container,
+            set_dialog_cache,
             update_image,
             update_source_name,
             set_dialog_line,
             update_dialog_choices,
-            update_dialog_line,
-            dialog_end_reached,
-            hide_dialog,
             highlight_focused_element,
+            update_dialog_line,
+            fetch_next_dialog_block.run_if(dialog_end_reached),
+            end_dialog,
         )
             .chain(),
     );
@@ -124,10 +128,11 @@ fn spawn_dialog_cache(mut commands: Commands) {
         CurrentDialogSourceName(Default::default()),
         CurrentDialogChoices(Default::default()),
         CurrentSourceEntity(Default::default()),
+        CurrentDialogChoiceIndex(Default::default()),
     ));
 }
 
-fn set_dialog_infos(
+fn set_dialog_cache(
     mut dialog_events: MessageReader<DisplayCurrentDialogEvent>,
     dialog_infos: Query<(
         &mut CurrentDialogLines,
@@ -168,6 +173,23 @@ fn set_dialog_infos(
     }
 }
 
+fn clean_dialog_container(
+    mut commands: Commands,
+    lines: Query<Entity, With<DialogLinesUi>>,
+    choices: Query<Entity, With<DialogChoiceUi>>,
+    keys: Res<PlayerInputs>,
+) {
+    if keys.just_pressed_actions.contains(&PlayerAction::Activate) {
+        for line in lines {
+            commands.entity(line).despawn();
+        }
+
+        for choice in choices {
+            commands.entity(choice).despawn();
+        }
+    }
+}
+
 fn update_image(
     dialog_image: Single<&CurrentDialogImage, Changed<CurrentDialogImage>>,
     image_node: Single<&mut ImageNode, With<DialogImageUi>>,
@@ -190,7 +212,6 @@ fn update_source_name(
 
 fn set_dialog_line(
     mut commands: Commands,
-    nodes: Query<Entity, With<DialogBodyUi>>,
     dialog_lines: Single<&mut CurrentDialogLines, Changed<CurrentDialogLines>>,
     dialog_container: Single<Entity, With<DialogContainer>>,
 ) {
@@ -199,10 +220,6 @@ fn set_dialog_line(
 
     if let Some(key) = dialog_lines.0.clone().keys().min() {
         if *key == 0 {
-            for node in nodes {
-                commands.entity(node).despawn();
-            }
-
             let node = commands
                 .spawn((
                     Text::new(dialog_lines.0[key].clone()),
@@ -211,7 +228,7 @@ fn set_dialog_line(
                         ..default()
                     },
                     TextColor(BLACK.into()),
-                    DialogBodyUi,
+                    DialogLinesUi,
                 ))
                 .id();
 
@@ -225,7 +242,6 @@ fn set_dialog_line(
 fn update_dialog_line(
     mut commands: Commands,
     dialog_lines: Single<&mut CurrentDialogLines>,
-    nodes: Query<Entity, With<DialogBodyUi>>,
     dialog_container: Single<Entity, With<DialogContainer>>,
     keys: Res<PlayerInputs>,
 ) {
@@ -233,10 +249,6 @@ fn update_dialog_line(
     let mut dialog_lines = dialog_lines.into_inner();
 
     if keys.just_pressed_actions.contains(&PlayerAction::Activate) && !dialog_lines.0.is_empty() {
-        for node in nodes {
-            commands.entity(node).despawn();
-        }
-
         if let Some(key) = dialog_lines.0.clone().keys().min() {
             let node = commands
                 .spawn((
@@ -246,7 +258,7 @@ fn update_dialog_line(
                         ..default()
                     },
                     TextColor(BLACK.into()),
-                    DialogBodyUi,
+                    DialogLinesUi,
                 ))
                 .id();
 
@@ -257,11 +269,35 @@ fn update_dialog_line(
     }
 }
 
+fn dialog_end_reached(choices: Query<&DialogChoiceUi>, lines: Query<&DialogLinesUi>) -> bool {
+    choices.is_empty() && lines.is_empty()
+}
+
+fn fetch_next_dialog_block(
+    mut dialog_event: MessageWriter<RunDialogEvent>,
+    source_entity: Single<&CurrentSourceEntity>,
+    choice_index: Single<&mut CurrentDialogChoiceIndex>,
+    keys: Res<PlayerInputs>,
+) {
+    if let Some(source_entity) = source_entity.into_inner().0
+        && keys.just_pressed_actions.contains(&PlayerAction::Activate)
+    {
+        let mut choice_index = choice_index.into_inner();
+
+        println!("Fetching next dialog block");
+        dialog_event.write(RunDialogEvent {
+            source_entity,
+            choice_index: choice_index.0,
+        });
+
+        choice_index.0 = None;
+    }
+}
+
 fn update_dialog_choices(
     mut commands: Commands,
     mut directional_nav_map: ResMut<DirectionalNavigationMap>,
     mut input_focus: ResMut<InputFocus>,
-    dialog_nodes: Query<Entity, With<DialogBodyUi>>,
     dialog_infos: Single<(&CurrentDialogLines, &mut CurrentDialogChoices)>,
     node: Single<Entity, With<DialogContainer>>,
     keys: Res<PlayerInputs>,
@@ -272,10 +308,6 @@ fn update_dialog_choices(
         && !dialog_choices.0.is_empty()
         && keys.just_pressed_actions.contains(&PlayerAction::Activate)
     {
-        for dialog_node in dialog_nodes {
-            commands.entity(dialog_node).despawn();
-        }
-
         let node = node.into_inner();
 
         let mut choices: Vec<Entity> = vec![];
@@ -299,18 +331,12 @@ fn update_dialog_choices(
                 ))
                 .id();
 
-            let choice_index = dialog_choices
-                .0
-                .iter()
-                .position(|c| c.index == choice.index)
-                .unwrap();
-
-            dialog_choices.0.remove(choice_index);
-
             commands.entity(node).add_child(choice_node);
 
             choices.push(choice_node);
         }
+
+        dialog_choices.0.clear();
 
         directional_nav_map.add_looping_edges(&choices, CompassOctant::South);
 
@@ -320,34 +346,26 @@ fn update_dialog_choices(
 
 fn highlight_focused_element(
     input_focus: Res<InputFocus>,
-    // While this isn't strictly needed for the example,
-    // we're demonstrating how to be a good citizen by respecting the `InputFocusVisible` resource.
     input_focus_visible: Res<InputFocusVisible>,
     mut query: Query<(Entity, &mut TextFont), With<DialogChoiceUi>>,
 ) {
     for (entity, mut text) in query.iter_mut() {
         if input_focus.0 == Some(entity) && input_focus_visible.0 {
-            text.font_size = super::DEFAULT_FONT_SIZE + 5.
+            text.font_size = super::DEFAULT_FONT_SIZE + 5.;
         } else {
-            text.font_size = super::DEFAULT_FONT_SIZE
+            text.font_size = super::DEFAULT_FONT_SIZE;
         }
     }
 }
 
-fn select_choice(
+fn set_choice_index(
     event: On<InputSelected>,
     mut commands: Commands,
-    mut dialog_event: MessageWriter<RunDialogEvent>,
     choices: Query<(Entity, &DialogChoiceIndex), With<DialogChoiceUi>>,
-    source_entity: Single<&CurrentSourceEntity>,
+    current_choice_index: Single<&mut CurrentDialogChoiceIndex>,
 ) {
-    if let Ok((_, choice_index)) = choices.get(event.entity)
-        && let Some(source_entity) = source_entity.into_inner().0
-    {
-        dialog_event.write(RunDialogEvent {
-            source_entity: source_entity,
-            choice_index: Some(choice_index.0),
-        });
+    if let Ok((_, choice_index)) = choices.get(event.entity) {
+        current_choice_index.into_inner().0 = Some(choice_index.0);
     }
 
     for (entity, _) in choices {
@@ -355,21 +373,7 @@ fn select_choice(
     }
 }
 
-fn dialog_end_reached(
-    choices: Single<&CurrentDialogChoices>,
-    lines: Single<&CurrentDialogLines>,
-    mut dialog_ended_event: MessageWriter<DialogEndedEvent>,
-    keys: Res<PlayerInputs>,
-) {
-    if choices.into_inner().0.is_empty()
-        && lines.into_inner().0.is_empty()
-        && keys.just_pressed_actions.contains(&PlayerAction::Activate)
-    {
-        dialog_ended_event.write(DialogEndedEvent);
-    }
-}
-
-fn hide_dialog(
+fn end_dialog(
     mut dialog_events: MessageReader<DialogEndedEvent>,
     dialog_container: Single<&mut Node, With<DialogContainer>>,
 ) {
