@@ -376,10 +376,19 @@ fn set_choice_index(
 fn end_dialog(
     mut dialog_events: MessageReader<DialogEndedEvent>,
     dialog_container: Single<&mut Node, With<DialogContainer>>,
+    dialog_infos: Single<(
+        &mut CurrentSourceEntity,
+        &mut CurrentDialogImage,
+        &mut CurrentDialogSourceName,
+    )>,
 ) {
     let mut container = dialog_container.into_inner();
+    let (mut source_entity, mut dialog_image, mut dialog_source_name) = dialog_infos.into_inner();
 
     for _ in dialog_events.read() {
         container.display = Display::None;
+        source_entity.0 = Default::default();
+        dialog_source_name.0 = Default::default();
+        dialog_image.0 = Default::default();
     }
 }
