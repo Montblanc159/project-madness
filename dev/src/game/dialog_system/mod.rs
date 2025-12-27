@@ -1,12 +1,13 @@
-use std::{collections::HashMap, fmt::Debug, rc::Rc};
+use std::{collections::HashMap, fmt::Debug};
 
 use bevy::{asset::LoadedFolder, prelude::*};
-use bladeink::story::Story;
 
 use crate::game::{
     custom_asset_types::ink_json::InkJson,
     map::npc::{AvatarFilePath, NpcName},
 };
+
+mod helpers;
 
 #[derive(Resource, Default)]
 struct DialogsFolder(Handle<LoadedFolder>);
@@ -98,52 +99,6 @@ fn cache_dialogs(
     }
 }
 
-fn get_story_with_state(inkjson: &str, state: &str, knot: &str) -> Story {
-    let mut story = match Story::new(inkjson) {
-        Ok(story) => story,
-        Err(err) => panic!("Story can't be read: {:?}", err),
-    };
-
-    if !state.is_empty() {
-        story.load_state(state).expect("Could not load story state");
-    }
-
-    if !knot.is_empty() {
-        story
-            .choose_path_string(knot, true, None)
-            .expect("Could not load story knot");
-    }
-
-    story
-}
-
-fn get_lines(story: &mut Story) -> Vec<String> {
-    let mut lines = Vec::new();
-
-    while story.can_continue() {
-        if let Ok(line) = story.cont() {
-            lines.push(line);
-        }
-    }
-
-    lines
-}
-
-fn get_choices(story: &Story) -> Vec<DialogChoice> {
-    let mut choices = vec![];
-
-    for mut choice in story.get_current_choices().into_iter() {
-        let choice = Rc::make_mut(&mut choice);
-
-        choices.push(DialogChoice {
-            body: choice.text.clone(),
-            index: choice.index.clone().into_inner(),
-        });
-    }
-
-    choices
-}
-
 fn run_dialog(
     mut dialog_event: MessageReader<RunDialogEvent>,
     mut dialog_ui_event: MessageWriter<DisplayCurrentDialogEvent>,
@@ -163,7 +118,8 @@ fn run_dialog(
             entities.get(event.source_entity)
         {
             if let Some(dialog_file) = dialogs_cache.dialogs.get(&file_path.0) {
-                let mut story = get_story_with_state(dialog_file, &dialog_state.0, &dialog_knot.0);
+                let mut story =
+                    helpers::get_story_with_state(dialog_file, &dialog_state.0, &dialog_knot.0);
 
                 if let Some(choice_index) = event.choice_index {
                     story
@@ -171,7 +127,7 @@ fn run_dialog(
                         .expect("Could not set story choice");
                 }
 
-                let lines = get_lines(&mut story);
+                let lines = helpers::get_lines(&mut story);
 
                 if let Ok(dialog_state) = story.save_state() {
                     update_entity_event.write(UpdateDialogStateEvent {
@@ -180,7 +136,7 @@ fn run_dialog(
                     });
                 }
 
-                let choices = get_choices(&story);
+                let choices = helpers::get_choices(&story);
 
                 if lines.is_empty() && choices.is_empty() {
                     dialog_ended_event.write(DialogEndedEvent);
