@@ -7,12 +7,13 @@ use bevy_tweening::*;
 use rand::prelude::*;
 
 use crate::game::{
+    dialog_system::{DialogEndedEvent, DialogFilePath, DialogKnot, DialogState, RunDialogEvent},
     map::{
         GRID_SIZE,
         colliders::{Collider, LevelColliders},
         zones::{Zones, wander_zones::WanderZone},
     },
-    player::JITTER_THRESHOLD,
+    player::{Activate, JITTER_THRESHOLD},
     tick::{MainTick, MainTickCounter, TICK_DELTA},
 };
 
@@ -20,14 +21,34 @@ mod dummy_npc;
 
 const NPC_Z_DEPTH: f32 = 2.;
 
-pub fn plugin(app: &mut App) {
-    app.add_plugins(dummy_npc::plugin);
-}
-
 trait Npc {
     fn identifier() -> String;
     fn aseslice(server: &Res<AssetServer>) -> AseSlice;
     fn new() -> impl Bundle;
+}
+
+#[derive(Component)]
+struct Wanderer;
+
+#[derive(Component, Default)]
+pub struct AvatarFilePath(pub String);
+
+#[derive(Component, Default)]
+pub struct NpcName(pub String);
+
+#[derive(Component)]
+#[require(DialogFilePath, DialogState, DialogKnot, AvatarFilePath, NpcName)]
+struct Talkable;
+
+#[derive(Component)]
+enum NpcStance {
+    Roaming,
+    Talking,
+}
+
+pub fn plugin(app: &mut App) {
+    app.add_plugins(dummy_npc::plugin);
+    app.add_systems(Update, (wander, talk, end_talk));
 }
 
 fn spawn_npc<T: Component + Npc>(
@@ -44,6 +65,7 @@ fn spawn_npc<T: Component + Npc>(
                     ..entity_instance.grid.into()
                 },
                 Collider,
+                NpcStance::Roaming,
                 Transform {
                     translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
                         entity_instance.grid.into(),
@@ -72,8 +94,8 @@ fn despawn_npc<T: Component + Npc>(
     }
 }
 
-fn wander<T: Component + Npc>(
-    npc: Query<&mut GridCoords, With<T>>,
+fn wander(
+    npc: Query<(&mut GridCoords, &NpcStance), With<Wanderer>>,
     level_colliders: Res<LevelColliders>,
     main_tick: Res<MainTick>,
     main_tick_counter: Res<MainTickCounter>,
@@ -83,7 +105,11 @@ fn wander<T: Component + Npc>(
         let mut rng = rand::rng();
         let nums: Vec<i32> = (0..2).collect();
 
-        for mut grid_coords in npc {
+        for (mut grid_coords, stance) in npc {
+            if let NpcStance::Talking = stance {
+                return;
+            }
+
             let move_distance = nums.choose(&mut rng);
             let left_or_up = rand::random_bool(1.0 / 2.0);
             let add_or_sub = rand::random_bool(1.0 / 2.0);
@@ -138,5 +164,35 @@ fn update_npc_position<T: Component + Npc>(
         );
 
         commands.entity(entity).insert(TweenAnim::new(tween));
+    }
+}
+
+fn talk(
+    mut activate_event: MessageReader<Activate>,
+    mut dialog_event: MessageWriter<RunDialogEvent>,
+    talkable_npc: Query<(Entity, &GridCoords, &mut NpcStance), With<Talkable>>,
+) {
+    for (entity, grid_coords, mut stance) in talkable_npc {
+        for event in activate_event.read() {
+            if event.grid_coords == (*grid_coords).into() {
+                dialog_event.write(RunDialogEvent {
+                    source_entity: entity,
+                    choice_index: None,
+                });
+
+                *stance = NpcStance::Talking;
+            }
+        }
+    }
+}
+
+fn end_talk(
+    talking_npc: Query<&mut NpcStance, With<Talkable>>,
+    mut dialog_ended_event: MessageReader<DialogEndedEvent>,
+) {
+    for mut stance in talking_npc {
+        for _ in dialog_ended_event.read() {
+            *stance = NpcStance::Roaming;
+        }
     }
 }

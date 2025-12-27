@@ -3,7 +3,7 @@ use bevy_ecs_ldtk::prelude::*;
 
 mod actionables;
 pub mod colliders;
-mod npc;
+pub mod npc;
 pub mod utils;
 mod zones;
 

@@ -16,11 +16,11 @@ pub struct CameraTarget;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(level_transition_shader::plugin);
-    app.add_systems(Startup, initialize_camera);
+    app.add_systems(Startup, spawn_camera);
     app.add_systems(Update, lock_camera_on_target);
 }
 
-fn initialize_camera(mut commands: Commands, camera_target: Query<&Transform, With<CameraTarget>>) {
+pub fn spawn_camera(mut commands: Commands, camera_target: Query<&Transform, With<CameraTarget>>) {
     let target_transform = *camera_target.single().unwrap_or(&Transform {
         ..Default::default()
     });
@@ -33,9 +33,7 @@ fn initialize_camera(mut commands: Commands, camera_target: Query<&Transform, Wi
             ..Default::default()
         },
         Projection::Orthographic(OrthographicProjection {
-            scaling_mode: bevy::camera::ScalingMode::FixedVertical {
-                viewport_height: 160.,
-            },
+            scale: 0.1,
             ..OrthographicProjection::default_2d()
         }),
         LevelTransitionShaderSettings {

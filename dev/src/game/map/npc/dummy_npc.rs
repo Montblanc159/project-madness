@@ -2,12 +2,27 @@ use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
 use bevy_ecs_ldtk::GridCoords;
 
-use crate::game::player::Activate;
+use crate::game::{
+    dialog_system::{DialogFilePath, DialogKnot, DialogState},
+    player::Activate,
+};
 
 const IDENTIFIER: &str = "DummyNpc";
 
 #[derive(Component)]
 struct DummyNpc;
+
+#[derive(Bundle)]
+struct DummyNpcBundle {
+    dummy_npc: DummyNpc,
+    wanderer: super::Wanderer,
+    talkable: super::Talkable,
+    dialog_file_path: DialogFilePath,
+    dialog_state: DialogState,
+    dialog_knot: DialogKnot,
+    avatar_file_path: super::AvatarFilePath,
+    npc_name: super::NpcName,
+}
 
 impl super::Npc for DummyNpc {
     fn identifier() -> String {
@@ -22,7 +37,16 @@ impl super::Npc for DummyNpc {
     }
 
     fn new() -> impl Bundle {
-        DummyNpc
+        DummyNpcBundle {
+            dummy_npc: DummyNpc,
+            wanderer: super::Wanderer,
+            talkable: super::Talkable,
+            dialog_file_path: DialogFilePath("dialogs/dummy_npc.ink.json".into()),
+            dialog_state: DialogState("".into()),
+            dialog_knot: DialogKnot("".into()),
+            avatar_file_path: super::AvatarFilePath("textures/npcs/dummy_npc_avatar.png".into()),
+            npc_name: super::NpcName("Dummy Npc".into()),
+        }
     }
 }
 
@@ -32,7 +56,6 @@ pub fn plugin(app: &mut App) {
         (
             super::despawn_npc::<DummyNpc>,
             super::spawn_npc::<DummyNpc>,
-            super::wander::<DummyNpc>,
             super::update_npc_position::<DummyNpc>,
             activate,
         ),
