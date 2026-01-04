@@ -7,13 +7,13 @@ use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
 use crate::game::dialog_system::{DialogEndedEvent, RunDialogEvent};
+use crate::game::tick::TickDelta;
 
 use super::camera::CameraTarget;
 use super::map::{
     GRID_SIZE,
     colliders::{Collider, LevelColliders},
 };
-use super::tick::TICK_DELTA;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;
 const ACTION_Z_DEPTH: f32 = 2.;
@@ -162,9 +162,9 @@ fn spawn_player(
     }
 }
 
-fn init_walk_cycle_timer(mut commands: Commands) {
+fn init_walk_cycle_timer(mut commands: Commands, tick_delta: Res<TickDelta>) {
     commands.insert_resource(WalkCycleTimer {
-        timer: Timer::new(Duration::from_secs_f32(TICK_DELTA), TimerMode::Once),
+        timer: Timer::new(Duration::from_secs_f32(tick_delta.0), TimerMode::Once),
     })
 }
 
@@ -223,11 +223,12 @@ fn update_player_grid_coords(
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
     level_colliders: Res<LevelColliders>,
     time: Res<Time>,
+    tick_delta: Res<TickDelta>,
 ) {
     for (mut player_grid_coords, velocity) in query.iter_mut() {
         let destination = *player_grid_coords + velocity.value.into();
 
-        if walk_cycle_timer.timer.remaining_secs() == TICK_DELTA
+        if walk_cycle_timer.timer.remaining_secs() == tick_delta.0
             && !walk_cycle_timer.timer.is_paused()
             && !level_colliders.in_collider(&destination)
         {
@@ -274,6 +275,7 @@ fn set_translate_with_grid_coords(
         (Entity, &Transform, &GridCoords),
         (Changed<GridCoords>, With<Player>),
     >,
+    tick_delta: Res<TickDelta>,
 ) {
     for (entity, transform, grid_coords) in grid_coords_entities.iter_mut() {
         let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
@@ -284,7 +286,7 @@ fn set_translate_with_grid_coords(
 
         let tween = Tween::new(
             EaseFunction::Linear,
-            Duration::from_secs_f32(TICK_DELTA + JITTER_THRESHOLD),
+            Duration::from_secs_f32(tick_delta.0 + JITTER_THRESHOLD),
             lens::TransformPositionLens {
                 start: transform.translation,
                 end: destination,
