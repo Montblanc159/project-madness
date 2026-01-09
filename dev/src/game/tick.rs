@@ -2,8 +2,9 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-const DEFAULT_GAME_BEAT_DIVISION: f32 = 0.5;
 const DEFAULT_BPM: f32 = 120.;
+const DEFAULT_BEATS_PER_MEASURE: f32 = 4.;
+const DEFAULT_NOTES_PER_MEASURE: f32 = 4.;
 
 #[derive(Resource)]
 pub struct MainTick {
@@ -16,17 +17,26 @@ pub struct MainTickCounter {
 }
 
 #[derive(Resource)]
-pub struct TickDelta(pub f32);
+pub struct TickDelta {
+    pub _beat: f32,
+    pub measure: f32,
+    pub note: f32,
+}
 
 #[derive(Resource, Clone)]
 pub struct GameTempo {
-    bpm: f32,
-    division: f32,
+    pub bpm: f32,
+    pub beats_per_measure: f32,
+    pub notes_per_measure: f32,
 }
 
 impl Into<TickDelta> for GameTempo {
     fn into(self) -> TickDelta {
-        TickDelta(60. / (self.bpm / self.division))
+        TickDelta {
+            _beat: 60. / self.bpm,
+            measure: (60. / self.bpm) * self.beats_per_measure,
+            note: ((60. / self.bpm) * self.beats_per_measure) / self.notes_per_measure,
+        }
     }
 }
 
@@ -35,7 +45,8 @@ pub fn plugin(app: &mut App) {
 
     let game_tempo = GameTempo {
         bpm: DEFAULT_BPM,
-        division: DEFAULT_GAME_BEAT_DIVISION,
+        beats_per_measure: DEFAULT_BEATS_PER_MEASURE,
+        notes_per_measure: DEFAULT_NOTES_PER_MEASURE,
     };
 
     app.insert_resource::<TickDelta>(game_tempo.clone().into());
@@ -56,7 +67,10 @@ pub fn plugin(app: &mut App) {
 
 fn setup_main_tick(mut commands: Commands, tick_delta: Res<TickDelta>) {
     commands.insert_resource(MainTick {
-        timer: Timer::new(Duration::from_secs_f32(tick_delta.0), TimerMode::Repeating),
+        timer: Timer::new(
+            Duration::from_secs_f32(tick_delta.note),
+            TimerMode::Repeating,
+        ),
     })
 }
 
@@ -84,6 +98,6 @@ fn update_main_tick(mut main_tick: ResMut<MainTick>, tick_delta: Res<TickDelta>)
     if tick_delta.is_changed() {
         main_tick
             .timer
-            .set_duration(Duration::from_secs_f32(tick_delta.0));
+            .set_duration(Duration::from_secs_f32(tick_delta.note));
     }
 }

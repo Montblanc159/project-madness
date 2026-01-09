@@ -157,7 +157,7 @@ fn update_npc_position<T: Component + Npc>(
 
         let tween = Tween::new(
             EaseFunction::Linear,
-            Duration::from_secs_f32(tick_delta.0 + JITTER_THRESHOLD),
+            Duration::from_secs_f32(tick_delta.note + JITTER_THRESHOLD),
             lens::TransformPositionLens {
                 start: transform.translation,
                 end: destination,
