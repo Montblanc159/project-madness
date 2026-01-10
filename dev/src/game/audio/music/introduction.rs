@@ -38,10 +38,12 @@ pub fn plugin(app: &mut App) {
             super::spawn_current_song::<IntroductionSong>,
             spawn_intro_part,
             spawn_main_part,
-            spawn_main_melody_sample,
-            spawn_main_rhythm_sample,
-            spawn_main_bass_sample,
-            spawn_main_extra_sample,
+            (
+                spawn_main_melody_sample,
+                spawn_main_rhythm_sample,
+                spawn_main_bass_sample,
+                spawn_main_extra_sample,
+            ),
         )
             .chain()
             .after(super::despawn_old_song_part),

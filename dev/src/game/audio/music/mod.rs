@@ -166,7 +166,11 @@ fn play_audios(
     melody_channel: Res<AudioChannel<MelodyAudioChannel>>,
     extra_channel: Res<AudioChannel<ExtraAudioChannel>>,
 ) {
-    for music_sample in music_samples {
+    if !music_samples.is_empty() {
+        music_updated.0 = false
+    }
+
+    music_samples.par_iter().for_each(|music_sample| {
         match music_sample.audio_channel {
             AudioChannels::Rhythm => {
                 rhythm_channel.stop();
@@ -185,9 +189,7 @@ fn play_audios(
                 extra_channel.play(music_sample.file.to_owned()).looped();
             }
         };
-
-        music_updated.0 = false
-    }
+    });
 }
 
 fn time_to_update(
