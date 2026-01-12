@@ -3,6 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_kira_audio::SpatialAudioReceiver;
 use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
@@ -158,6 +159,7 @@ fn spawn_player(
                 PlayerStance::Roaming,
                 MovementState::Free,
                 ActionState::Free,
+                SpatialAudioReceiver,
             ));
         }
     }

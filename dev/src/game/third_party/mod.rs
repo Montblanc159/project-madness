@@ -9,4 +9,5 @@ pub fn plugin(app: &mut App) {
     app.add_plugins(AsepriteUltraPlugin);
     app.add_plugins(TweeningPlugin);
     app.add_plugins(AudioPlugin);
+    app.add_plugins(SpatialAudioPlugin);
 }
