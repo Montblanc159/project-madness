@@ -11,7 +11,7 @@ pub const GRID_SIZE: i32 = 16;
 
 #[derive(Resource, Default, Debug)]
 pub struct CurrentLevelInfos {
-    identifier: String,
+    pub identifier: String,
     coming_from: Option<String>,
 }
 

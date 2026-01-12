@@ -5,6 +5,7 @@ use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
 
 use crate::game::map::{GRID_SIZE, utils};
 
+mod music_zones;
 mod portals;
 pub mod wander_zones;
 
@@ -25,7 +26,7 @@ impl<T: Component> Zones<T> {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((portals::plugin, wander_zones::plugin));
+    app.add_plugins((portals::plugin, wander_zones::plugin, music_zones::plugin));
 }
 
 fn empty_zones_cache<T: Component>(

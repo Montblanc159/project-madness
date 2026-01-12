@@ -14,7 +14,7 @@ use crate::game::{
         zones::{Zones, wander_zones::WanderZone},
     },
     player::{Activate, JITTER_THRESHOLD},
-    tick::{MainTick, MainTickCounter, TICK_DELTA},
+    tick::{MainTick, MainTickCounter, TickDelta},
 };
 
 mod dummy_npc;
@@ -146,6 +146,7 @@ fn wander(
 fn update_npc_position<T: Component + Npc>(
     mut commands: Commands,
     npc: Query<(Entity, &Transform, &GridCoords), (With<T>, Changed<GridCoords>)>,
+    tick_delta: Res<TickDelta>,
 ) {
     for (entity, transform, grid_coords) in npc {
         let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
@@ -156,7 +157,7 @@ fn update_npc_position<T: Component + Npc>(
 
         let tween = Tween::new(
             EaseFunction::Linear,
-            Duration::from_secs_f32(TICK_DELTA + JITTER_THRESHOLD),
+            Duration::from_secs_f32(tick_delta.note + JITTER_THRESHOLD),
             lens::TransformPositionLens {
                 start: transform.translation,
                 end: destination,

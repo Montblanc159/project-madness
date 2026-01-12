@@ -3,17 +3,18 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_kira_audio::SpatialAudioReceiver;
 use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
 use crate::game::dialog_system::{DialogEndedEvent, RunDialogEvent};
+use crate::game::tick::TickDelta;
 
 use super::camera::CameraTarget;
 use super::map::{
     GRID_SIZE,
     colliders::{Collider, LevelColliders},
 };
-use super::tick::TICK_DELTA;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;
 const ACTION_Z_DEPTH: f32 = 2.;
@@ -109,6 +110,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
+            update_walk_cycle_timer,
             set_talking_stance,
             remove_talking_stance,
             update_player_states,
@@ -157,15 +159,35 @@ fn spawn_player(
                 PlayerStance::Roaming,
                 MovementState::Free,
                 ActionState::Free,
+                SpatialAudioReceiver,
             ));
         }
     }
 }
 
-fn init_walk_cycle_timer(mut commands: Commands) {
+fn init_walk_cycle_timer(mut commands: Commands, tick_delta: Res<TickDelta>) {
     commands.insert_resource(WalkCycleTimer {
-        timer: Timer::new(Duration::from_secs_f32(TICK_DELTA), TimerMode::Once),
+        timer: Timer::new(Duration::from_secs_f32(tick_delta.note), TimerMode::Once),
     })
+}
+
+fn update_walk_cycle_timer(mut timer: ResMut<WalkCycleTimer>, tick_delta: Res<TickDelta>) {
+    if tick_delta.is_changed() {
+        let duration = timer.timer.duration().as_secs_f32();
+        let elapsed = timer.timer.elapsed_secs();
+
+        let elapsed_percent = (elapsed * 100.) / duration;
+
+        let new_elapsed = tick_delta.note * (elapsed_percent / 100.);
+
+        timer
+            .timer
+            .set_duration(Duration::from_secs_f32(tick_delta.note));
+
+        timer
+            .timer
+            .set_elapsed(Duration::from_secs_f32(new_elapsed));
+    }
 }
 
 fn player_movement_input(
@@ -223,11 +245,12 @@ fn update_player_grid_coords(
     mut walk_cycle_timer: ResMut<WalkCycleTimer>,
     level_colliders: Res<LevelColliders>,
     time: Res<Time>,
+    tick_delta: Res<TickDelta>,
 ) {
     for (mut player_grid_coords, velocity) in query.iter_mut() {
         let destination = *player_grid_coords + velocity.value.into();
 
-        if walk_cycle_timer.timer.remaining_secs() == TICK_DELTA
+        if walk_cycle_timer.timer.remaining_secs() == tick_delta.note
             && !walk_cycle_timer.timer.is_paused()
             && !level_colliders.in_collider(&destination)
         {
@@ -274,6 +297,7 @@ fn set_translate_with_grid_coords(
         (Entity, &Transform, &GridCoords),
         (Changed<GridCoords>, With<Player>),
     >,
+    tick_delta: Res<TickDelta>,
 ) {
     for (entity, transform, grid_coords) in grid_coords_entities.iter_mut() {
         let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
@@ -284,7 +308,7 @@ fn set_translate_with_grid_coords(
 
         let tween = Tween::new(
             EaseFunction::Linear,
-            Duration::from_secs_f32(TICK_DELTA + JITTER_THRESHOLD),
+            Duration::from_secs_f32(tick_delta.note + JITTER_THRESHOLD),
             lens::TransformPositionLens {
                 start: transform.translation,
                 end: destination,
