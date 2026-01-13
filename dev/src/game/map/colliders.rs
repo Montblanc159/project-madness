@@ -6,8 +6,12 @@ use bevy_ecs_ldtk::prelude::*;
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Collider;
 
+#[derive(Default, Component, Debug, Clone)]
+pub struct Wall;
+
 #[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
 pub struct ColliderBundle {
+    wall: Wall,
     collider: Collider,
 }
 

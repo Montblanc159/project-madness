@@ -16,10 +16,14 @@ pub struct MainTickCounter {
     pub value: u8,
 }
 
+/// Stores the duration of the different divisions rhythming the game
 #[derive(Resource)]
 pub struct TickDelta {
+    /// Returns the duration of a beat
     pub _beat: f32,
+    /// Returns the duration of a measure
     pub measure: f32,
+    /// Returns the duration of a note
     pub note: f32,
 }
 

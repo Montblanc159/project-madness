@@ -2,3 +2,5 @@
 [Intro main bass loop](https://www.looperman.com/loops/detail/403414/milli-s-dark-bass-1-free-120bpm-trap-bass-synth-loop)
 [Intro main extra loop](https://www.looperman.com/loops/detail/394960/dark-string-melody-120-dmin-free-120bpm-trap-synth-loop)
 [Intro main melody loop](https://www.looperman.com/loops/detail/414847/guitar-120-bpm-dm-free-120bpm-trap-acoustic-guitar-loop)
+[Swamp audio](https://opengameart.org/content/swamp-environment-audio)
+[Boiling audio](https://opengameart.org/content/boiling-water-loops)
