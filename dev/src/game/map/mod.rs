@@ -3,6 +3,7 @@ use bevy_ecs_ldtk::prelude::*;
 
 mod actionables;
 pub mod colliders;
+pub mod inerts;
 pub mod npc;
 pub mod utils;
 mod zones;
@@ -28,6 +29,7 @@ pub fn plugin(app: &mut App) {
     app.add_plugins(zones::plugin);
     app.add_plugins(npc::plugin);
     app.add_plugins(actionables::plugin);
+    // app.add_plugins(inerts::plugin);
 }
 
 fn map_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
