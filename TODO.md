@@ -11,10 +11,16 @@ Thicken the plot
 ### Camera
 - Clamp to sides of map ??
 - transition when changing level - OK
+- cinematics
+- 3d cam ?
 
 ### Actions
 Actions based on last direction +1 gridcoords with "spacebar" - OK
 Rebuild using a facing state -> allow changing orientation when on a wall - OK
+
+### Story
+- dialog sys -> OK
+- story system
 
 ### Map hierarchy
 - refacto colliders ? -> linked to make npc collide - OK
@@ -24,13 +30,18 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 
 - dynamic spawning of zones/actionables -> insert named component on `Added<EntityInstance>`, hook on `Added<NamedComponent>` to spawn zones/actionables instead of directly hooking to `Added<EntityInstance>` => Zones/actions will now be able to be spawned by, for example, NPCs
 
+### UI
+- Dialogs comics images
+- menu
+- settings
+
 ### NPCs
 - add npcs - OK
 - make them collide - OK
 - make them wander - OK
     - Slow wandering - OK
     - add a zone to limit wandering ? (clamp) - OK
-- make them talk - dialogue system with ink
+- make them talk - dialogue system with ink - OK
 
 
 - add ennemies (later) + [pathfinding](https://en.wikipedia.org/wiki/A*_search_algorithm)
@@ -43,8 +54,6 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 
 ### Game states
 - save system
-- menu
-- settings
 
 ### Optimizations
 - Compressed assets ?
@@ -59,6 +68,7 @@ four levels:
 
 ### Refactors
 - player
+- despawn_entity_on_level_change instead of useless specific despawn
 - where clauses on big generic systems
 
 ### Document
