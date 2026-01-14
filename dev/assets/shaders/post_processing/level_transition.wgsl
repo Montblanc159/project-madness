@@ -7,14 +7,14 @@ const COLOR2 = vec3(0.01, 0.01, 0.01);
 
 @group(0) @binding(0) var screen_texture: texture_2d<f32>;
 @group(0) @binding(1) var texture_sampler: sampler;
-struct PostProcessSettings {
+struct LevelTransitionShaderSettings {
     time: f32,
 #ifdef SIXTEEN_BYTE_ALIGNMENT
     // WebGL2 structs must be 16 byte aligned.
     _webgl2_padding: vec3<f32>
 #endif
 }
-@group(0) @binding(2) var<uniform> settings: PostProcessSettings;
+@group(0) @binding(2) var<uniform> settings: LevelTransitionShaderSettings;
 
 @fragment
 fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
@@ -24,9 +24,9 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
 
     let tex: vec4<f32> = textureSample(screen_texture, texture_sampler, uv);
 
-    let progress: f32 = (sin(settings.time * 8.0) + 1.0 + (1.0 / CELLS)) * 0.5;
+    let progress: f32 = 1.0 - (settings.time);
 
-    let sUv: vec2<f32> = fract(uv * (1.0 / cellSize));
+    let sUv: vec2<f32> = fract(uv * cellSize);
 
     let distToEdge: f32 = min(min(sUv.x, 1.0 - sUv.x), min(sUv.y, 1.0 - sUv.y));
 

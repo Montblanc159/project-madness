@@ -32,15 +32,14 @@ impl super::ShaderAsset for LevelTransitionShaderSettings {
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(super::plugin::<LevelTransitionShaderSettings>);
-    app.insert_resource(TransitionTimer {
-        value: Timer::new(Duration::from_secs_f32(0.5), TimerMode::Once),
+    app.insert_resource({
+        let mut timer = TransitionTimer {
+            value: Timer::new(Duration::from_secs_f32(1.0), TimerMode::Once),
+        };
+        timer.value.finish();
+        timer
     });
-    app.add_systems(Startup, end_timer);
     app.add_systems(Update, update_settings);
-}
-
-fn end_timer(mut timer: ResMut<TransitionTimer>) {
-    timer.value.set_elapsed(Duration::from_secs_f32(0.));
 }
 
 fn update_settings(
@@ -55,7 +54,7 @@ fn update_settings(
         }
     }
 
-    if !timer.value.just_finished() {
+    if !timer.value.is_finished() {
         for mut setting in &mut settings {
             // This will then be extracted to the render world and uploaded to the GPU automatically by the [`UniformComponentPlugin`]
             setting.time = timer.value.elapsed_secs();
