@@ -20,6 +20,7 @@ fn play_ambient(
 ) {
     for level_event in level_messages.read() {
         if let LevelEvent::Spawned(_) = level_event {
+            background.stop();
             background.play(asset_server.load(format!(
                 "audios/levels/{}/ambient.ogg.ron",
                 level_infos.identifier
