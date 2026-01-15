@@ -5,6 +5,7 @@ pub mod music;
 pub mod object_audio;
 mod player_audio;
 
+/// All audio related plugins
 pub fn plugin(app: &mut App) {
     app.add_plugins((
         player_audio::plugin,

@@ -5,6 +5,7 @@ use crate::game::tick::{GameTempo, MainTick, MainTickCounter, TickDelta};
 
 mod introduction;
 
+/// Main song parameters, influencing game tempo
 #[derive(Component)]
 struct Song {
     bpm: f32,
@@ -12,25 +13,68 @@ struct Song {
     notes_per_measure: f32,
 }
 
+/// This is meant to be added on a `Component` used to
+/// identify which song is going to be queued
+/// Stores all parameters linked to a song
+/// A 8/5 rythmed song with 90 bpm called T Song would be implemented as follows :
+/// ```
+/// impl SongParameters for TSong {
+///     fn title() -> String {
+///         "T Song"
+///     }
+///
+///     fn new() -> impl Bundle  {
+///         Self
+///     }
+///
+///     fn bpm() -> f32 {
+///         90.
+///     }
+///
+///     fn beats_per_measure() -> f32 {
+///         5.
+///     }
+///
+///     fn notes_per_measure() -> f32 {
+///         8.
+///     }
+/// }
+/// ```
+
 trait SongParameters {
+    /// Song title
     fn title() -> String;
+    /// Returns self or a bundle with self
     fn new() -> impl Bundle;
+    /// Song beats per minute
     fn bpm() -> f32;
+    /// Number of beats per measures
+    /// Used with bpm to compute length in seconds of a measure
     fn beats_per_measure() -> f32;
+    /// Number of notes per measures
+    /// Used with length in seconds of a measure to compute
+    /// length of one note
     fn notes_per_measure() -> f32;
 }
 
+/// Used by `MusicSample` components to know when
+/// they should spawn or not. It allows to build
+/// song parts that spawn all the music samples linked to it.
 #[derive(Component)]
 struct SongPart {
     identifier: String,
 }
 
+/// The most basic component of a song
+/// Holds an audio file and the audio channel
+/// it will be queued in
 #[derive(Component)]
 struct MusicSample {
     file: Handle<AudioSource>,
     audio_channel: AudioChannels,
 }
 
+/// Lists all music audio channels
 pub enum AudioChannels {
     Rhythm,
     Bass,
@@ -38,27 +82,39 @@ pub enum AudioChannels {
     Extra,
 }
 
+/// Audio channel for all rythmic samples
 #[derive(Resource)]
 struct RhythmAudioChannel;
 
+/// Audio channel for all melodic samples
 #[derive(Resource)]
 struct MelodyAudioChannel;
 
+/// Audio channel for all bass samples
 #[derive(Resource)]
 struct BassAudioChannel;
 
+/// Audio channel for all misc samples
 #[derive(Resource)]
 struct ExtraAudioChannel;
 
+/// A message when read, launches a
+/// specific song and a specific music part
+/// using identifiers of the said song/part
+/// If identifiers does not link to a song, nothing happens.
 #[derive(Message)]
 pub struct PlaySong {
     pub song_title: String,
     pub part: String,
 }
 
+/// A message to stop all samples in all music audio channels
 #[derive(Message)]
 struct StopMusic;
 
+/// A resource set to true if a PlaySong message is read
+/// Allows to wait for music measure to finish before queuing new song/song part
+/// Set to false after music samples are updated
 #[derive(Resource)]
 struct MusicUpdated(bool);
 
@@ -84,6 +140,7 @@ pub fn plugin(app: &mut App) {
     app.add_plugins(introduction::plugin);
 }
 
+/// Update game tempo with song tempo
 fn set_game_tempo(song: Single<&Song, Added<Song>>, mut game_tempo: ResMut<GameTempo>) {
     let song = song.into_inner();
 
@@ -94,6 +151,7 @@ fn set_game_tempo(song: Single<&Song, Added<Song>>, mut game_tempo: ResMut<GameT
     game_tempo.beats_per_measure = song.beats_per_measure;
 }
 
+/// Despawn old song component when a new song is queued
 fn despawn_old_music(
     mut commands: Commands,
     songs: Query<Entity, With<Song>>,
@@ -106,6 +164,7 @@ fn despawn_old_music(
     }
 }
 
+/// Despawn old song part component when new song is queued
 fn despawn_old_song_part(
     mut commands: Commands,
     song_parts: Query<Entity, With<SongPart>>,
@@ -118,12 +177,15 @@ fn despawn_old_song_part(
     }
 }
 
+/// Set `MusicUpdate` resource to true if new song is queued
 fn set_music_updated(mut events: MessageReader<PlaySong>, mut music_updated: ResMut<MusicUpdated>) {
     for _ in events.read() {
         music_updated.0 = true;
     }
 }
 
+/// Stop all samples and despawn `Song` component
+/// if `StopMusic` message received
 fn stop_music<T: Component + SongParameters>(
     mut commands: Commands,
     mut events: MessageReader<StopMusic>,
@@ -136,6 +198,8 @@ fn stop_music<T: Component + SongParameters>(
     }
 }
 
+/// Spawns `Song` based on song title
+/// received in a `PlaySong` message
 fn spawn_current_song<T: Component + SongParameters>(
     mut commands: Commands,
     mut events: MessageReader<PlaySong>,
@@ -154,6 +218,8 @@ fn spawn_current_song<T: Component + SongParameters>(
     }
 }
 
+/// First stop audios and set music_updated to false
+/// than queue all music samples in respective audio channels
 fn play_audios(
     mut music_updated: ResMut<MusicUpdated>,
     music_samples: Query<&MusicSample>,
@@ -180,6 +246,11 @@ fn play_audios(
     });
 }
 
+/// Returns true if music has been updated (`MusicUpdated`)
+/// main_tick timer has ended
+/// and music measure has ended
+/// Used as a run condition for play_audios system
+/// to avoid cutting music samples in the middle
 fn time_to_update(
     music_updated: Res<MusicUpdated>,
     main_tick: Res<MainTick>,

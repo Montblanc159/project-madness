@@ -3,20 +3,30 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl, SpatialAudioEmitter, SpatialRadius};
 
+/// All spatial related audio channel
 #[derive(Resource)]
 pub struct SpatialAudioChannel;
 
+/// Identifies an object that has spatial audio
 #[derive(Component)]
 pub struct SpatialAudioObject;
 
+/// Trait used to set spatial audio parameters for an object
 pub trait SpatialAudioParameters {
+    /// Specific file path fetched in a list of path
+    /// identified by an audio_id
     fn file_path(audio_id: String) -> Option<String> {
         Self::file_paths().get(&audio_id).cloned()
     }
 
+    /// Lists all audio file paths with an identifier
+    /// to fetch them
     fn file_paths() -> HashMap<String, String>;
 }
 
+/// For interactive/actionable objects.
+/// Instructs a system to play an audio in the list of files
+/// linked to the entity
 #[derive(Message)]
 pub struct PlayObjectAudio {
     pub entity: Entity,
@@ -29,6 +39,9 @@ pub fn plugin(app: &mut App) {
     // app.add_systems(Update, play_ambient);
 }
 
+/// Plays and spatializes default audio to a spatial audio Component
+/// If no default, does nothing (objects can have triggered spatialized sounds while
+/// not emitting anything continuously)
 pub fn setup_spatial_object_audio<T: Component + SpatialAudioParameters>(
     mut commands: Commands,
     spatial_audio_channel: Res<AudioChannel<SpatialAudioChannel>>,
@@ -56,6 +69,8 @@ pub fn setup_spatial_object_audio<T: Component + SpatialAudioParameters>(
     }
 }
 
+/// Queues linked entity audios
+/// Upon receiving `PlayObjectAudio` message
 pub fn queue_object_audio<T: Component + SpatialAudioParameters>(
     mut events: MessageReader<PlayObjectAudio>,
     spatial_audio_channel: Res<AudioChannel<SpatialAudioChannel>>,

@@ -6,12 +6,16 @@ use rand::prelude::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
 
+/// Folder holding variants of a player action audio
 #[derive(Resource, Default)]
 struct PlayerAudioFoldersCache(HashMap<PlayerAudioVariant, Handle<LoadedFolder>>);
 
+/// Variants with corresponding audio file cache
 #[derive(Resource, Default)]
 struct PlayerAudiosCache(HashMap<PlayerAudioVariant, Vec<Handle<AudioSource>>>);
 
+/// All possible actions a player can perform that triggers audio on himself (walking, activating).
+/// None if no sound to emit
 #[derive(Resource, Eq, PartialEq, Hash, Clone)]
 enum PlayerAudioVariant {
     Activate,
@@ -19,10 +23,14 @@ enum PlayerAudioVariant {
 }
 
 impl PlayerAudioVariant {
+    /// List all player actions emitting an audio
     fn variants() -> Vec<Self> {
         vec![Self::Activate]
     }
 
+    /// Get folder path for a specific variant.
+    /// Folder stores different variant of a sound
+    /// to avoid annoying players with repeated sound
     fn get_folder_path(&self) -> &'static str {
         match self {
             Self::Activate => "audios/player/activate",
@@ -30,6 +38,7 @@ impl PlayerAudioVariant {
         }
     }
 
+    /// Returns a specific variant based on player action received
     fn from_player_action(player_action: &PlayerAction) -> Self {
         match player_action {
             PlayerAction::Activate => Self::Activate,
@@ -38,6 +47,7 @@ impl PlayerAudioVariant {
     }
 }
 
+/// All player emitted sounds audio channel
 #[derive(Resource)]
 struct PlayerAudioChannel;
 
@@ -50,6 +60,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Update, cache_audios);
 }
 
+/// Add all folder handles to cache
 fn load_audio_folders(asset_server: Res<AssetServer>, mut cache: ResMut<PlayerAudioFoldersCache>) {
     for audio_variant in PlayerAudioVariant::variants() {
         let folder = asset_server.load_folder(audio_variant.get_folder_path());
@@ -58,6 +69,7 @@ fn load_audio_folders(asset_server: Res<AssetServer>, mut cache: ResMut<PlayerAu
     }
 }
 
+/// Add all audio files held in folder cache in audio file cache
 fn cache_audios(
     mut events: MessageReader<AssetEvent<LoadedFolder>>,
     loaded_folders: Res<PlayerAudioFoldersCache>,
@@ -85,6 +97,7 @@ fn cache_audios(
     }
 }
 
+/// Trigger random variant of a sound emitted by a player action
 fn react_to_player_action(
     actions: Res<PlayerInputs>,
     player_channel: Res<AudioChannel<PlayerAudioChannel>>,
