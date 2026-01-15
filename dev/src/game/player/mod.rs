@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_firefly::lights::PointLight2d;
-use bevy_kira_audio::SpatialAudioReceiver;
 use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
@@ -160,7 +159,6 @@ fn spawn_player(
                 PlayerStance::Roaming,
                 MovementState::Free,
                 ActionState::Free,
-                SpatialAudioReceiver,
                 PointLight2d {
                     color: Color::srgb(1.0, 1.0, 1.0),
                     range: GRID_SIZE as f32 * 3.,

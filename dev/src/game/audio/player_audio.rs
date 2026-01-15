@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 
 use bevy::{asset::LoadedFolder, prelude::*};
-use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl, AudioSource};
+use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl, AudioSource, SpatialAudioReceiver};
 use rand::prelude::*;
 
-use crate::game::controls::{PlayerAction, PlayerInputs};
+use crate::game::{
+    controls::{PlayerAction, PlayerInputs},
+    player::Player,
+};
 
 #[derive(Resource, Default)]
 struct PlayerAudioFoldersCache(HashMap<PlayerAudioVariant, Handle<LoadedFolder>>);
@@ -46,8 +49,14 @@ pub fn plugin(app: &mut App) {
     app.init_resource::<PlayerAudiosCache>();
     app.init_resource::<PlayerAudioFoldersCache>();
     app.add_systems(Startup, load_audio_folders);
-    app.add_systems(Update, react_to_player_action);
+    app.add_systems(Update, (add_receiver_to_player, react_to_player_action));
     app.add_systems(Update, cache_audios);
+}
+
+fn add_receiver_to_player(mut commands: Commands, players: Query<Entity, Added<Player>>) {
+    for entity in players {
+        commands.entity(entity).insert(SpatialAudioReceiver);
+    }
 }
 
 fn load_audio_folders(asset_server: Res<AssetServer>, mut cache: ResMut<PlayerAudioFoldersCache>) {
