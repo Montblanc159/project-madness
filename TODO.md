@@ -49,6 +49,10 @@ Rebuild using a facing state -> allow changing orientation when on a wall - OK
 
 ### Add items
 
+### Audios
+- stop audios in channels when stop music message received
+- parameterize radius for spatial objects
+
 ### Add multiple input (keyboard + gamepad)
 - add player settings to change inputs dynamically
 
