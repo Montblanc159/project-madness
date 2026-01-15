@@ -3,4 +3,4 @@
 sh ./install-dependencies
 
 cargo build
-cargo doc
+cargo doc --document-private-items
