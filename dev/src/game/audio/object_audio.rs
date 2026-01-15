@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl, SpatialAudioEmitter, SpatialRadius};
 
+const DEFAULT_RADIUS: f32 = 150.;
+
 #[derive(Resource)]
 pub struct SpatialAudioChannel;
 
@@ -15,6 +17,10 @@ pub trait SpatialAudioParameters {
     }
 
     fn file_paths() -> HashMap<String, String>;
+
+    fn radius() -> f32 {
+        DEFAULT_RADIUS
+    }
 }
 
 #[derive(Message)]
@@ -51,7 +57,9 @@ pub fn setup_spatial_object_audio<T: Component + SpatialAudioParameters>(
             SpatialAudioEmitter {
                 instances: audio_instances,
             },
-            SpatialRadius { radius: 150.0 },
+            SpatialRadius {
+                radius: T::radius(),
+            },
         ));
     }
 }

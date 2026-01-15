@@ -128,10 +128,18 @@ fn stop_music<T: Component + SongParameters>(
     mut commands: Commands,
     mut events: MessageReader<StopMusic>,
     songs: Query<Entity, With<T>>,
+    rhythm_channel: Res<AudioChannel<RhythmAudioChannel>>,
+    bass_channel: Res<AudioChannel<BassAudioChannel>>,
+    melody_channel: Res<AudioChannel<MelodyAudioChannel>>,
+    extra_channel: Res<AudioChannel<ExtraAudioChannel>>,
 ) {
     for entity in songs {
         for _ in events.read() {
             commands.entity(entity).despawn();
+            rhythm_channel.stop();
+            bass_channel.stop();
+            melody_channel.stop();
+            extra_channel.stop();
         }
     }
 }
