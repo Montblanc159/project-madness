@@ -74,13 +74,13 @@ fn activate(
     mut event: MessageWriter<PlaySong>,
 ) {
     for grid_coords in players {
-        if zones.activated(grid_coords) {
-            if let Some(zone) = zones.zone_on_gridcoord(grid_coords) {
-                event.write(PlaySong {
-                    song_title: zone.song_title.clone(),
-                    part: zone.part.clone(),
-                });
-            }
+        if zones.activated(grid_coords)
+            && let Some(zone) = zones.zone_on_gridcoord(grid_coords)
+        {
+            event.write(PlaySong {
+                song_title: zone.song_title.clone(),
+                part: zone.part.clone(),
+            });
         }
     }
 }

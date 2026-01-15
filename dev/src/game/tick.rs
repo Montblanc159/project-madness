@@ -34,12 +34,12 @@ pub struct GameTempo {
     pub notes_per_measure: f32,
 }
 
-impl Into<TickDelta> for GameTempo {
-    fn into(self) -> TickDelta {
+impl From<GameTempo> for TickDelta {
+    fn from(val: GameTempo) -> Self {
         TickDelta {
-            _beat: 60. / self.bpm,
-            measure: (60. / self.bpm) * self.beats_per_measure,
-            note: ((60. / self.bpm) * self.beats_per_measure) / self.notes_per_measure,
+            _beat: 60. / val.bpm,
+            measure: (60. / val.bpm) * val.beats_per_measure,
+            note: ((60. / val.bpm) * val.beats_per_measure) / val.notes_per_measure,
         }
     }
 }

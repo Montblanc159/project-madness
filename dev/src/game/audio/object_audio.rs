@@ -11,11 +11,7 @@ pub struct SpatialAudioObject;
 
 pub trait SpatialAudioParameters {
     fn file_path(audio_id: String) -> Option<String> {
-        if let Some(path) = Self::file_paths().get(&audio_id) {
-            Some(path.clone())
-        } else {
-            None
-        }
+        Self::file_paths().get(&audio_id).cloned()
     }
 
     fn file_paths() -> HashMap<String, String>;
@@ -67,14 +63,14 @@ pub fn queue_object_audio<T: Component + SpatialAudioParameters>(
     mut spatial_objects: Query<&mut SpatialAudioEmitter, (With<SpatialAudioObject>, With<T>)>,
 ) {
     for event in events.read() {
-        if let Ok(mut audio_emitter) = spatial_objects.get_mut(event.entity) {
-            if let Some(file_path) = T::file_path(event.audio_id.clone()) {
-                let audio = spatial_audio_channel
-                    .play(asset_server.load(file_path))
-                    .handle();
+        if let Ok(mut audio_emitter) = spatial_objects.get_mut(event.entity)
+            && let Some(file_path) = T::file_path(event.audio_id.clone())
+        {
+            let audio = spatial_audio_channel
+                .play(asset_server.load(file_path))
+                .handle();
 
-                audio_emitter.instances.push(audio);
-            }
+            audio_emitter.instances.push(audio);
         }
     }
 }

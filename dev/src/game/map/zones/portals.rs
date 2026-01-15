@@ -71,11 +71,11 @@ fn activate(
     mut level_selection: ResMut<LevelSelection>,
 ) {
     for (entity, grid_coords) in players {
-        if portals.activated(grid_coords) {
-            if let Some(portal) = portals.portal_on_gridcoord(grid_coords) {
-                *level_selection = LevelSelection::Identifier(portal.to.clone());
-                commands.entity(entity).insert(NotTeleportable);
-            }
+        if portals.activated(grid_coords)
+            && let Some(portal) = portals.portal_on_gridcoord(grid_coords)
+        {
+            *level_selection = LevelSelection::Identifier(portal.to.clone());
+            commands.entity(entity).insert(NotTeleportable);
         }
     }
 }
@@ -91,15 +91,15 @@ fn spawn_player_on_portal(
         if let LevelEvent::Spawned(_) = level_event {
             for player in players {
                 for (grid_coords, portal) in level_portals.locations.iter() {
-                    if let Some(coming_from) = &level_infos.coming_from {
-                        if portal.to == *coming_from {
-                            teleport_message.write(Teleported {
-                                entity: player,
-                                grid_coords: (*grid_coords).into(),
-                            });
+                    if let Some(coming_from) = &level_infos.coming_from
+                        && portal.to == *coming_from
+                    {
+                        teleport_message.write(Teleported {
+                            entity: player,
+                            grid_coords: (*grid_coords).into(),
+                        });
 
-                            break;
-                        }
+                        break;
                     }
                 }
             }

@@ -136,7 +136,7 @@ fn spawn_player(
     server: Res<AssetServer>,
 ) {
     for entity_instance in new_entity_instances.iter() {
-        if entity_instance.identifier == "Player".to_string() && !players.iter().next().is_some() {
+        if entity_instance.identifier == "Player" && players.iter().next().is_none() {
             commands.spawn((
                 Player,
                 Collider,
@@ -153,7 +153,7 @@ fn spawn_player(
                     ..Default::default()
                 },
                 ActionZone {
-                    value: (entity_instance.grid + ivec2(0, -1)).into(),
+                    value: (entity_instance.grid + ivec2(0, -1)),
                     display: None,
                 },
                 Facing::South,
@@ -285,7 +285,7 @@ fn teleport_player(
 
             player_transform.translation = bevy_ecs_ldtk::utils::grid_coords_to_translation(
                 event.grid_coords.into(),
-                IVec2::splat(GRID_SIZE.into()),
+                IVec2::splat(GRID_SIZE),
             )
             .extend(PLAYER_Z_DEPTH);
 
@@ -306,11 +306,9 @@ fn set_translate_with_grid_coords(
     tick_delta: Res<TickDelta>,
 ) {
     for (entity, transform, grid_coords) in grid_coords_entities.iter_mut() {
-        let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
-            *grid_coords,
-            IVec2::splat(GRID_SIZE.into()),
-        )
-        .extend(PLAYER_Z_DEPTH);
+        let destination =
+            bevy_ecs_ldtk::utils::grid_coords_to_translation(*grid_coords, IVec2::splat(GRID_SIZE))
+                .extend(PLAYER_Z_DEPTH);
 
         let tween = Tween::new(
             EaseFunction::Linear,
@@ -364,7 +362,7 @@ fn display_action_zone(
                 Transform {
                     translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
                         zone.into(),
-                        IVec2::splat(GRID_SIZE.into()),
+                        IVec2::splat(GRID_SIZE),
                     )
                     .extend(ACTION_Z_DEPTH),
                     ..Default::default()
@@ -388,7 +386,7 @@ fn update_display_action_zone(
                 .insert(Transform {
                     translation: bevy_ecs_ldtk::utils::grid_coords_to_translation(
                         action_zone.value.into(),
-                        IVec2::splat(GRID_SIZE.into()),
+                        IVec2::splat(GRID_SIZE),
                     )
                     .extend(ACTION_Z_DEPTH),
                     ..Default::default()
@@ -407,7 +405,7 @@ fn activate(
             if let ActionState::Free = action_state {
                 activate_event.write(Activate {
                     _entity: entity,
-                    grid_coords: action_zone.value.into(),
+                    grid_coords: action_zone.value,
                 });
             }
         }

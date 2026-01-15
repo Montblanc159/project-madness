@@ -218,24 +218,24 @@ fn set_dialog_line(
     let dialog_container = dialog_container.into_inner();
     let mut dialog_lines = dialog_lines.into_inner();
 
-    if let Some(key) = dialog_lines.0.clone().keys().min() {
-        if *key == 0 {
-            let node = commands
-                .spawn((
-                    Text::new(dialog_lines.0[key].clone()),
-                    TextFont {
-                        font_size: super::DEFAULT_FONT_SIZE,
-                        ..default()
-                    },
-                    TextColor(BLACK.into()),
-                    DialogLinesUi,
-                ))
-                .id();
+    if let Some(key) = dialog_lines.0.clone().keys().min()
+        && *key == 0
+    {
+        let node = commands
+            .spawn((
+                Text::new(dialog_lines.0[key].clone()),
+                TextFont {
+                    font_size: super::DEFAULT_FONT_SIZE,
+                    ..default()
+                },
+                TextColor(BLACK.into()),
+                DialogLinesUi,
+            ))
+            .id();
 
-            commands.entity(dialog_container).add_child(node);
+        commands.entity(dialog_container).add_child(node);
 
-            dialog_lines.0.remove(key);
-        }
+        dialog_lines.0.remove(key);
     }
 }
 
@@ -248,25 +248,26 @@ fn update_dialog_line(
     let dialog_container = dialog_container.into_inner();
     let mut dialog_lines = dialog_lines.into_inner();
 
-    if keys.just_pressed_actions.contains(&PlayerAction::Activate) && !dialog_lines.0.is_empty() {
-        if let Some(key) = dialog_lines.0.clone().keys().min() {
-            let node = commands
-                .spawn((
-                    Text::new(dialog_lines.0[key].clone()),
-                    TextFont {
-                        font_size: super::DEFAULT_FONT_SIZE,
-                        ..default()
-                    },
-                    TextColor(BLACK.into()),
-                    DialogLinesUi,
-                ))
-                .id();
+    if keys.just_pressed_actions.contains(&PlayerAction::Activate)
+        && !dialog_lines.0.is_empty()
+        && let Some(key) = dialog_lines.0.clone().keys().min()
+    {
+        let node = commands
+            .spawn((
+                Text::new(dialog_lines.0[key].clone()),
+                TextFont {
+                    font_size: super::DEFAULT_FONT_SIZE,
+                    ..default()
+                },
+                TextColor(BLACK.into()),
+                DialogLinesUi,
+            ))
+            .id();
 
-            commands.entity(dialog_container).add_child(node);
+        commands.entity(dialog_container).add_child(node);
 
-            dialog_lines.0.remove(key);
-        };
-    }
+        dialog_lines.0.remove(key);
+    };
 }
 
 fn dialog_end_reached(choices: Query<&DialogChoiceUi>, lines: Query<&DialogLinesUi>) -> bool {

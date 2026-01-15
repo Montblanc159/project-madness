@@ -101,7 +101,7 @@ fn wander(
     main_tick_counter: Res<MainTickCounter>,
     wandering_zones: Res<Zones<WanderZone>>,
 ) {
-    if main_tick.timer.just_finished() && main_tick_counter.value % 4 == 0 {
+    if main_tick.timer.just_finished() && main_tick_counter.value.is_multiple_of(4) {
         let mut rng = rand::rng();
         let nums: Vec<i32> = (0..2).collect();
 
@@ -149,11 +149,9 @@ fn update_npc_position<T: Component + Npc>(
     tick_delta: Res<TickDelta>,
 ) {
     for (entity, transform, grid_coords) in npc {
-        let destination = bevy_ecs_ldtk::utils::grid_coords_to_translation(
-            *grid_coords,
-            IVec2::splat(GRID_SIZE.into()),
-        )
-        .extend(NPC_Z_DEPTH);
+        let destination =
+            bevy_ecs_ldtk::utils::grid_coords_to_translation(*grid_coords, IVec2::splat(GRID_SIZE))
+                .extend(NPC_Z_DEPTH);
 
         let tween = Tween::new(
             EaseFunction::Linear,

@@ -76,7 +76,7 @@ fn cache_audios(
                 for handle in loaded_folder.handles.iter() {
                     let audio = handle.clone().typed::<AudioSource>();
 
-                    if let Some(audio_cache) = player_audio_cache.0.get_mut(&player_audio_variant) {
+                    if let Some(audio_cache) = player_audio_cache.0.get_mut(player_audio_variant) {
                         audio_cache.push(audio);
                     }
                 }
@@ -95,10 +95,10 @@ fn react_to_player_action(
     for action in &actions.just_pressed_actions {
         let audio_action = PlayerAudioVariant::from_player_action(action);
 
-        if let Some(audios) = player_audio_cache.0.get(&audio_action) {
-            if let Some(audio) = audios.choose(&mut rng) {
-                player_channel.play(audio.to_owned());
-            }
+        if let Some(audios) = player_audio_cache.0.get(&audio_action)
+            && let Some(audio) = audios.choose(&mut rng)
+        {
+            player_channel.play(audio.to_owned());
         }
     }
 }

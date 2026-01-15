@@ -58,7 +58,7 @@ fn spawn_intro_part(
     let song = song.into_inner();
 
     for event in events.read() {
-        if event.part == String::from("intro") {
+        if event.part == "intro" {
             commands.entity(song).with_children(|parent| {
                 parent.spawn(super::SongPart {
                     identifier: "intro".into(),
@@ -76,7 +76,7 @@ fn spawn_main_part(
     let song = song.into_inner();
 
     for event in events.read() {
-        if event.part == String::from("main") {
+        if event.part == "main" {
             commands.entity(song).with_children(|parent| {
                 parent.spawn(super::SongPart {
                     identifier: "main".into(),

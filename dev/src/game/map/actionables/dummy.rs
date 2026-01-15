@@ -30,7 +30,7 @@ fn spawn_entity_instance(
     new_entity_instances: Query<(&EntityInstance, &Transform), Added<EntityInstance>>,
 ) {
     for (entity_instance, transform) in new_entity_instances.iter() {
-        if &entity_instance.identifier == &IDENTIFIER.to_string() {
+        if entity_instance.identifier == IDENTIFIER {
             let entity_origin = utils::entity_top_left_pixel_position(
                 transform.translation,
                 entity_instance.width,
@@ -59,12 +59,12 @@ fn spawn_entity_instance(
 
                 commands.spawn((
                     Transform {
+                        translation,
                         scale: Vec3 {
                             x: 1.,
                             y: 1.,
                             z: 1.,
                         },
-                        translation: translation,
                         ..*transform
                     },
                     DummyAction,

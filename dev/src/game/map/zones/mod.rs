@@ -59,7 +59,7 @@ fn spawn_zones<T: Component + Zone>(
     new_entity_instances: Query<(&EntityInstance, &Transform), Added<EntityInstance>>,
 ) {
     for (entity_instance, transform) in new_entity_instances.iter() {
-        if &entity_instance.identifier == &T::identifier() {
+        if entity_instance.identifier == T::identifier() {
             let full_span_grid_coords = utils::full_span_grid_coords(
                 entity_instance.width,
                 entity_instance.height,
@@ -76,12 +76,12 @@ fn spawn_zones<T: Component + Zone>(
 
                 commands.spawn((
                     Transform {
+                        translation,
                         scale: Vec3 {
                             x: 1.,
                             y: 1.,
                             z: 1.,
                         },
-                        translation: translation,
                         ..*transform
                     },
                     T::new(entity_instance),
@@ -97,8 +97,6 @@ fn cache_zones<T: Component + Clone>(
     zones: Query<(&T, &GridCoords), Added<T>>,
 ) {
     for (zone, grid_coords) in zones {
-        level_zones
-            .locations
-            .insert(grid_coords.clone(), zone.clone());
+        level_zones.locations.insert(*grid_coords, zone.clone());
     }
 }

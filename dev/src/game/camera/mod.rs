@@ -36,6 +36,7 @@ pub fn spawn_camera(mut commands: Commands, camera_target: Query<&Transform, Wit
             scale: 0.1,
             ..OrthographicProjection::default_2d()
         }),
+        #[allow(clippy::needless_update)]
         LevelTransitionShaderSettings {
             time: 0.0,
             ..default()

@@ -87,12 +87,12 @@ fn cache_dialogs(
             for handle in loaded_folder.handles.iter() {
                 let id = handle.id().typed::<InkJson>();
 
-                if let Some(dialog_json) = dialog_jsons.get(id) {
-                    if let Some(path) = handle.path().unwrap().path().to_str() {
-                        dialogs_cache
-                            .dialogs
-                            .insert(path.into(), dialog_json.string.clone().into());
-                    }
+                if let Some(dialog_json) = dialog_jsons.get(id)
+                    && let Some(path) = handle.path().unwrap().path().to_str()
+                {
+                    dialogs_cache
+                        .dialogs
+                        .insert(path.into(), dialog_json.string.clone());
                 }
             }
         }
@@ -116,41 +116,40 @@ fn run_dialog(
     for event in dialog_event.read() {
         if let Ok((file_path, dialog_state, dialog_knot, name, avatar_file_path)) =
             entities.get(event.source_entity)
+            && let Some(dialog_file) = dialogs_cache.dialogs.get(&file_path.0)
         {
-            if let Some(dialog_file) = dialogs_cache.dialogs.get(&file_path.0) {
-                let mut story =
-                    helpers::get_story_with_state(dialog_file, &dialog_state.0, &dialog_knot.0);
+            let mut story =
+                helpers::get_story_with_state(dialog_file, &dialog_state.0, &dialog_knot.0);
 
-                if let Some(choice_index) = event.choice_index {
-                    story
-                        .choose_choice_index(choice_index)
-                        .expect("Could not set story choice");
-                }
+            if let Some(choice_index) = event.choice_index {
+                story
+                    .choose_choice_index(choice_index)
+                    .expect("Could not set story choice");
+            }
 
-                let lines = helpers::get_lines(&mut story);
+            let lines = helpers::get_lines(&mut story);
 
-                if let Ok(dialog_state) = story.save_state() {
-                    update_entity_event.write(UpdateDialogStateEvent {
-                        source_entity: event.source_entity,
-                        dialog_state,
-                    });
-                }
+            if let Ok(dialog_state) = story.save_state() {
+                update_entity_event.write(UpdateDialogStateEvent {
+                    source_entity: event.source_entity,
+                    dialog_state,
+                });
+            }
 
-                let choices = helpers::get_choices(&story);
+            let choices = helpers::get_choices(&story);
 
-                if lines.is_empty() && choices.is_empty() {
-                    dialog_ended_event.write(DialogEndedEvent);
-                } else {
-                    dialog_ui_event.write(DisplayCurrentDialogEvent {
-                        source_entity: event.source_entity,
-                        source_name: name.0.clone(),
-                        image_path: avatar_file_path.0.clone(),
-                        lines,
-                        choices,
-                    });
-                }
-            };
-        }
+            if lines.is_empty() && choices.is_empty() {
+                dialog_ended_event.write(DialogEndedEvent);
+            } else {
+                dialog_ui_event.write(DisplayCurrentDialogEvent {
+                    source_entity: event.source_entity,
+                    source_name: name.0.clone(),
+                    image_path: avatar_file_path.0.clone(),
+                    lines,
+                    choices,
+                });
+            }
+        };
     }
 }
 
