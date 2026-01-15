@@ -9,11 +9,12 @@ use crate::game::{
 const DEFAULT_INTENSITY: f32 = 1.;
 
 mod occluders;
+mod player;
 pub mod torch;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, add_config_to_camera.after(spawn_camera));
-    app.add_plugins((occluders::plugin, torch::plugin));
+    app.add_plugins((occluders::plugin, player::plugin, torch::plugin));
 }
 
 fn add_config_to_camera(mut commands: Commands, camera: Single<Entity, With<MainCamera>>) {
