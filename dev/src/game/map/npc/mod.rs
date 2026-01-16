@@ -17,7 +17,7 @@ use crate::game::{
     tick::{MainTick, MainTickCounter, TickDelta},
 };
 
-mod dummy_npc;
+pub mod dummy_npc;
 
 const NPC_Z_DEPTH: f32 = 2.;
 

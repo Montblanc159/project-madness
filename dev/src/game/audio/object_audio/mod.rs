@@ -3,13 +3,12 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl, SpatialAudioEmitter, SpatialRadius};
 
+mod dummy_npc;
+
 const DEFAULT_RADIUS: f32 = 150.;
 
 #[derive(Resource)]
 pub struct SpatialAudioChannel;
-
-#[derive(Component)]
-pub struct SpatialAudioObject;
 
 pub trait SpatialAudioParameters {
     fn file_path(audio_id: String) -> Option<String> {
@@ -32,14 +31,14 @@ pub struct PlayObjectAudio {
 pub fn plugin(app: &mut App) {
     app.add_audio_channel::<SpatialAudioChannel>();
     app.add_message::<PlayObjectAudio>();
-    // app.add_systems(Update, play_ambient);
+    app.add_plugins(dummy_npc::plugin);
 }
 
 pub fn setup_spatial_object_audio<T: Component + SpatialAudioParameters>(
     mut commands: Commands,
     spatial_audio_channel: Res<AudioChannel<SpatialAudioChannel>>,
     asset_server: Res<AssetServer>,
-    spatial_objects: Query<Entity, (With<SpatialAudioObject>, Added<T>)>,
+    spatial_objects: Query<Entity, Added<T>>,
 ) {
     for entity in spatial_objects {
         let mut audio_instances = vec![];
@@ -68,7 +67,7 @@ pub fn queue_object_audio<T: Component + SpatialAudioParameters>(
     mut events: MessageReader<PlayObjectAudio>,
     spatial_audio_channel: Res<AudioChannel<SpatialAudioChannel>>,
     asset_server: Res<AssetServer>,
-    mut spatial_objects: Query<&mut SpatialAudioEmitter, (With<SpatialAudioObject>, With<T>)>,
+    mut spatial_objects: Query<&mut SpatialAudioEmitter, With<T>>,
 ) {
     for event in events.read() {
         if let Ok(mut audio_emitter) = spatial_objects.get_mut(event.entity)
