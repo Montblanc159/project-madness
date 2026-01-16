@@ -10,9 +10,9 @@ use crate::game::{
     dialog_system::{DialogEndedEvent, DialogFilePath, DialogKnot, DialogState, RunDialogEvent},
     map::{
         GRID_SIZE,
-        colliders::{Collider, LevelColliders},
         zones::{Zones, wander_zones::WanderZone},
     },
+    physics::colliders::{Collider, LevelColliders},
     player::{Activate, JITTER_THRESHOLD},
     tick::{MainTick, MainTickCounter, TickDelta},
 };

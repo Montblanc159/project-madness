@@ -7,13 +7,11 @@ use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
 use crate::game::dialog_system::{DialogEndedEvent, RunDialogEvent};
+use crate::game::physics::colliders::{Collider, LevelColliders};
 use crate::game::tick::TickDelta;
 
 use super::camera::CameraTarget;
-use super::map::{
-    GRID_SIZE,
-    colliders::{Collider, LevelColliders},
-};
+use super::map::GRID_SIZE;
 
 pub const JITTER_THRESHOLD: f32 = 0.015;
 const ACTION_Z_DEPTH: f32 = 2.;

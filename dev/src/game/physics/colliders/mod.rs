@@ -3,17 +3,12 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
+use crate::game::map::GRID_SIZE;
+
+mod wall;
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
 pub struct Collider;
-
-#[derive(Default, Component, Debug, Clone)]
-pub struct Wall;
-
-#[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
-pub struct ColliderBundle {
-    wall: Wall,
-    collider: Collider,
-}
 
 #[derive(Default, Resource)]
 pub struct LevelColliders {
@@ -36,8 +31,8 @@ impl LevelColliders {
 }
 
 pub fn plugin(app: &mut App) {
-    app.register_ldtk_int_cell::<ColliderBundle>(1);
     app.init_resource::<LevelColliders>();
+    app.add_plugins(wall::plugin);
     app.add_systems(
         Update,
         (
@@ -47,6 +42,12 @@ pub fn plugin(app: &mut App) {
             update_collider_locations,
         ),
     );
+}
+
+fn add_collider<T: Component>(mut commands: Commands, colliders: Query<Entity, Added<T>>) {
+    for entity in colliders {
+        commands.entity(entity).insert(Collider);
+    }
 }
 
 fn cache_level_bounds(
@@ -62,8 +63,8 @@ fn cache_level_bounds(
             let ldtk_project = ldtk_project_assets.get(ldtk_project_entities).unwrap();
             let level = ldtk_project.get_raw_level_by_iid(level_iid.get()).unwrap();
 
-            level_colliders.level_width = level.px_wid / super::GRID_SIZE;
-            level_colliders.level_height = level.px_hei / super::GRID_SIZE;
+            level_colliders.level_width = level.px_wid / GRID_SIZE;
+            level_colliders.level_height = level.px_hei / GRID_SIZE;
         }
     }
 }

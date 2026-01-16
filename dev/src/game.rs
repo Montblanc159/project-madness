@@ -7,6 +7,7 @@ mod custom_asset_types;
 mod dialog_system;
 mod lighting;
 mod map;
+mod physics;
 mod player;
 mod third_party;
 mod tick;
@@ -22,6 +23,7 @@ pub fn plugin(app: &mut App) {
         audio::plugin,
         camera::plugin,
         map::plugin,
+        physics::plugin,
         custom_asset_types::plugin,
         dialog_system::plugin,
         ui::plugin,

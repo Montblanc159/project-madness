@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_firefly::prelude::*;
 
-use crate::game::map::{GRID_SIZE, colliders::Wall};
+use crate::game::map::{GRID_SIZE, int_grid_objects::Wall};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, add_occluder::<Wall>);
