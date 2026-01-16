@@ -4,9 +4,13 @@ use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
 
 use crate::game::map::GRID_SIZE;
 
+pub mod torch;
+
 const OBJECT_Z_DEPTH: f32 = 1.5;
 
-// pub fn plugin(app: &mut App) {}
+pub fn plugin(app: &mut App) {
+    app.add_plugins(torch::plugin);
+}
 
 pub trait MapObject {
     fn identifier() -> String;

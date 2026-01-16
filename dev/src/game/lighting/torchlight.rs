@@ -1,40 +1,17 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_aseprite_ultra::prelude::AseSlice;
 use bevy_firefly::lights::PointLight2d;
 use bevy_tweening::{Lens, Tween, TweenAnim};
 use rand::prelude::*;
 
 use crate::game::{
-    map::{
-        GRID_SIZE,
-        inerts::{MapObject, despawn_object, spawn_object},
-    },
+    map::{GRID_SIZE, inerts::torch::Torch},
     tick::{MainTick, TickDelta},
 };
 
-const IDENTIFIER: &str = "Torch";
 const RANGE_GRID_COUNT: f32 = 2.;
 const FLICKER_STEPS: [f32; 7] = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.];
-
-#[derive(Component)]
-pub struct Torch;
-
-impl MapObject for Torch {
-    fn identifier() -> String {
-        IDENTIFIER.into()
-    }
-    fn aseslice(server: &Res<AssetServer>) -> AseSlice {
-        AseSlice {
-            name: "main".into(),
-            aseprite: server.load("textures/objects/torch.aseprite"),
-        }
-    }
-    fn new() -> impl Bundle {
-        Self
-    }
-}
 
 impl super::LightParameters for Torch {
     fn range() -> f32 {
@@ -51,7 +28,6 @@ impl super::LightParameters for Torch {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (despawn_object::<Torch>, spawn_object::<Torch>));
     app.add_systems(Update, (super::add_lights::<Torch>, flicker));
 }
 
