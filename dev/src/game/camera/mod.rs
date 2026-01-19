@@ -54,3 +54,115 @@ fn lock_camera_on_target(
 
     camera_transform.translation = target.translation;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn spawns_camera() {
+        // Setup
+        let mut app = App::new();
+        app.add_systems(Startup, spawn_camera);
+
+        // Run
+        app.update();
+        app.update();
+
+        // Check
+        let main_camera = app.world_mut().query::<&MainCamera>().single(app.world());
+        assert!(main_camera.is_ok(), "There should be only one MainCamera.")
+    }
+
+    #[test]
+    fn sets_transform_to_default_without_target() {
+        // Setup
+        let mut app = App::new();
+        app.add_systems(Startup, spawn_camera);
+
+        // Run
+        app.update();
+
+        // Check
+        let main_camera_transform = app
+            .world_mut()
+            .query_filtered::<&Transform, With<MainCamera>>()
+            .single(app.world());
+
+        assert!(
+            main_camera_transform.is_ok(),
+            "There should be only one MainCamera."
+        );
+
+        assert_eq!(
+            main_camera_transform.unwrap().translation,
+            Transform { ..default() }.translation
+        );
+    }
+
+    #[test]
+    fn sets_transform_to_target() {
+        // Setup
+        let mut app = App::new();
+        let translation = vec3(5., 5., 5.);
+        app.world_mut()
+            .spawn((CameraTarget, Transform::from_translation(translation)));
+        app.add_systems(Startup, spawn_camera);
+
+        // Run
+        app.update();
+
+        // Check
+        let main_camera_transform = app
+            .world_mut()
+            .query_filtered::<&Transform, With<MainCamera>>()
+            .single(app.world());
+
+        assert!(
+            main_camera_transform.is_ok(),
+            "There should be only one MainCamera."
+        );
+
+        assert_eq!(main_camera_transform.unwrap().translation, translation);
+    }
+
+    #[test]
+    fn updates_transform_with_target() {
+        // Setup
+        let mut app = App::new();
+        app.world_mut()
+            .spawn((CameraTarget, Transform::from_translation(vec3(5., 5., 5.))));
+
+        app.add_systems(Startup, spawn_camera);
+        app.add_systems(Update, lock_camera_on_target);
+
+        app.update();
+        let target_transform = app
+            .world_mut()
+            .query_filtered::<&mut Transform, With<CameraTarget>>()
+            .single_mut(app.world_mut());
+
+        let target_translation = vec3(10., 10., 10.);
+
+        target_transform.unwrap().translation = target_translation;
+
+        // Run
+        app.update();
+
+        // Check
+        let main_camera_transform = app
+            .world_mut()
+            .query_filtered::<&Transform, With<MainCamera>>()
+            .single(app.world());
+
+        assert!(
+            main_camera_transform.is_ok(),
+            "There should be only one MainCamera."
+        );
+
+        assert_eq!(
+            main_camera_transform.unwrap().translation,
+            target_translation
+        );
+    }
+}
