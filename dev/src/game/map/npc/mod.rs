@@ -162,7 +162,7 @@ fn update_npc_position<T: Component + Npc>(
             },
         );
 
-        commands.entity(entity).insert(TweenAnim::new(tween));
+        commands.entity(entity).try_insert(TweenAnim::new(tween));
     }
 }
 

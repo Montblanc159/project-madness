@@ -62,7 +62,7 @@ fn flicker(
                     },
                 );
 
-                commands.entity(entity).insert(TweenAnim::new(tween));
+                commands.entity(entity).try_insert(TweenAnim::new(tween));
             }
         }
     }
