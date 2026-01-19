@@ -72,7 +72,7 @@ four levels:
 
 ### Refactors
 - player
-- despawn_entity_on_level_change instead of useless specific despawn
+- despawn_entity_on_level_change instead of useless specific despawn - OK
 - where clauses on big generic systems
 
 ### Document
