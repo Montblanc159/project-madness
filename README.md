@@ -51,6 +51,10 @@ And follow README.md instructions
 Tilemap builder
 [Download here](https://ldtk.io/download/)
 
+### Rust beads
+Git synced local issue tracker
+[Setup found here](https://github.com/Dicklesworthstone/beads_rust)
+
 ## Game usage
 
 Game is built in bevy, a game engine developped in rust. It uses ECS (Entity Component System).
