@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
 
+use crate::game::global::despawn_entity_on_level_change;
+
 const IDENTIFIER: &str = "Torch";
 
 #[derive(Component)]
@@ -24,6 +26,9 @@ impl super::MapObject for Torch {
 pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
-        (super::despawn_object::<Torch>, super::spawn_object::<Torch>),
+        (
+            despawn_entity_on_level_change::<Torch>,
+            super::spawn_object::<Torch>,
+        ),
     );
 }

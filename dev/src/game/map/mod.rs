@@ -10,6 +10,11 @@ mod zones;
 
 pub const GRID_SIZE: i32 = 16;
 
+#[derive(Message)]
+pub struct ChangeLevel {
+    identifier: String,
+}
+
 #[derive(Resource, Default, Debug)]
 pub struct CurrentLevelInfos {
     pub identifier: String,
@@ -23,13 +28,25 @@ pub fn plugin(app: &mut App) {
     });
     app.insert_resource(LevelSelection::index(0));
 
+    app.add_message::<ChangeLevel>();
+
     app.add_systems(Startup, map_setup);
-    app.add_systems(Update, set_current_level_identifier);
+    app.add_systems(Update, (set_current_level_identifier, change_level));
+
     app.add_plugins(int_grid_objects::plugin);
     app.add_plugins(zones::plugin);
     app.add_plugins(npc::plugin);
     app.add_plugins(actionables::plugin);
     app.add_plugins(inerts::plugin);
+}
+
+pub fn change_level(
+    mut events: MessageReader<ChangeLevel>,
+    mut level_selection: ResMut<LevelSelection>,
+) {
+    for event in events.read() {
+        *level_selection = LevelSelection::Identifier(event.identifier.clone());
+    }
 }
 
 fn map_setup(mut commands: Commands, asset_server: Res<AssetServer>) {

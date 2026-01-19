@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
-use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
+use bevy_ecs_ldtk::{EntityInstance, GridCoords};
 
 use crate::game::map::GRID_SIZE;
 
@@ -41,20 +41,6 @@ pub fn spawn_object<T: Component + MapObject>(
                 },
                 T::new(),
             ));
-        }
-    }
-}
-
-pub fn despawn_object<T: Component + MapObject>(
-    objects: Query<Entity, With<T>>,
-    mut commands: Commands,
-    mut level_messages: MessageReader<LevelEvent>,
-) {
-    for level_event in level_messages.read() {
-        if let LevelEvent::Despawned(_) = level_event {
-            for entity in objects {
-                commands.entity(entity).despawn();
-            }
         }
     }
 }

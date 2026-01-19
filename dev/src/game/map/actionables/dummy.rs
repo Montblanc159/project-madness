@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::EntityInstance;
 
-use crate::game::map::{GRID_SIZE, utils};
+use crate::game::{
+    global::despawn_entity_on_level_change,
+    map::{GRID_SIZE, utils},
+};
 
 const IDENTIFIER: &str = "DummyAction";
 
@@ -18,7 +21,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
-            super::despawn_entity_instances::<DummyAction>,
+            despawn_entity_on_level_change::<DummyAction>,
             spawn_entity_instance,
             super::activate::<DummyAction>,
         ),

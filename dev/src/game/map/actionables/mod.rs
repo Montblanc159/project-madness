@@ -25,17 +25,3 @@ pub fn activate<T: Component + Action>(
         }
     }
 }
-
-fn despawn_entity_instances<T: Component + Action>(
-    portals: Query<Entity, With<T>>,
-    mut commands: Commands,
-    mut level_messages: MessageReader<LevelEvent>,
-) {
-    for level_event in level_messages.read() {
-        if let LevelEvent::Spawned(_) = level_event {
-            for entity in portals {
-                commands.entity(entity).despawn();
-            }
-        }
-    }
-}

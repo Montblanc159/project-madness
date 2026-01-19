@@ -40,20 +40,6 @@ fn empty_zones_cache<T: Component>(
     }
 }
 
-fn remove_zones<T: Component>(
-    zones: Query<Entity, With<T>>,
-    mut commands: Commands,
-    mut level_messages: MessageReader<LevelEvent>,
-) {
-    for level_event in level_messages.read() {
-        if let LevelEvent::Despawned(_) = level_event {
-            for entity in zones {
-                commands.entity(entity).despawn();
-            }
-        }
-    }
-}
-
 fn spawn_zones<T: Component + Zone>(
     mut commands: Commands,
     new_entity_instances: Query<(&EntityInstance, &Transform), Added<EntityInstance>>,

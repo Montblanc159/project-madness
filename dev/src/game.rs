@@ -5,6 +5,7 @@ mod camera;
 mod controls;
 mod custom_asset_types;
 mod dialog_system;
+mod global;
 mod lighting;
 mod map;
 mod physics;
@@ -30,5 +31,6 @@ pub fn plugin(app: &mut App) {
         tick::plugin,
         controls::plugin,
         player::plugin,
+        // global::plugin,
     ));
 }

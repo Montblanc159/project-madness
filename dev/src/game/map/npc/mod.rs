@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
-use bevy_ecs_ldtk::{EntityInstance, GridCoords, LevelEvent};
+use bevy_ecs_ldtk::{EntityInstance, GridCoords};
 use bevy_tweening::*;
 use rand::prelude::*;
 
@@ -76,20 +76,6 @@ fn spawn_npc<T: Component + Npc>(
                 },
                 T::new(),
             ));
-        }
-    }
-}
-
-fn despawn_npc<T: Component + Npc>(
-    npcs: Query<Entity, With<T>>,
-    mut commands: Commands,
-    mut level_messages: MessageReader<LevelEvent>,
-) {
-    for level_event in level_messages.read() {
-        if let LevelEvent::Despawned(_) = level_event {
-            for entity in npcs {
-                commands.entity(entity).despawn();
-            }
         }
     }
 }

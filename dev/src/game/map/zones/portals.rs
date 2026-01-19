@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 use crate::game::{
-    map::{CurrentLevelInfos, utils, zones::Zones},
+    global::despawn_entity_on_level_change,
+    map::{ChangeLevel, CurrentLevelInfos, utils, zones::Zones},
     player::{Player, Teleported},
 };
 
@@ -50,7 +51,7 @@ pub fn plugin(app: &mut App) {
         Update,
         (
             super::empty_zones_cache::<Portal>,
-            super::remove_zones::<Portal>,
+            despawn_entity_on_level_change::<Portal>,
             super::spawn_zones::<Portal>,
             super::cache_zones::<Portal>,
             spawn_player_on_portal,
@@ -63,18 +64,21 @@ pub fn plugin(app: &mut App) {
 
 fn activate(
     mut commands: Commands,
+    mut event: MessageWriter<ChangeLevel>,
     portals: Res<Zones<Portal>>,
     players: Query<
         (Entity, &GridCoords),
         (With<Player>, Changed<GridCoords>, Without<NotTeleportable>),
     >,
-    mut level_selection: ResMut<LevelSelection>,
 ) {
     for (entity, grid_coords) in players {
         if portals.activated(grid_coords)
             && let Some(portal) = portals.portal_on_gridcoord(grid_coords)
         {
-            *level_selection = LevelSelection::Identifier(portal.to.clone());
+            event.write(ChangeLevel {
+                identifier: portal.to.clone(),
+            });
+
             commands.entity(entity).insert(NotTeleportable);
         }
     }
