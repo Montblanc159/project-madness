@@ -6,10 +6,12 @@ use crate::game::camera::post_processing_shaders::level_transition_shader::{
 
 mod post_processing_shaders;
 
+/// Component used to identify main camera
 #[derive(Component)]
 #[require(Camera2d)]
 pub struct MainCamera;
 
+/// Component used to make the camera follow a target
 #[derive(Component)]
 #[require(Transform)]
 pub struct CameraTarget;
@@ -20,6 +22,7 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Update, lock_camera_on_target);
 }
 
+/// Spawning a startup a camera with a fullscreen shader that triggers every time the player is teleported to another level
 pub fn spawn_camera(mut commands: Commands, camera_target: Query<&Transform, With<CameraTarget>>) {
     let target_transform = *camera_target.single().unwrap_or(&Transform {
         ..Default::default()
@@ -45,6 +48,18 @@ pub fn spawn_camera(mut commands: Commands, camera_target: Query<&Transform, Wit
     ));
 }
 
+/// Updates camera transforms according to an entity with the CameraTarget Component
+/// Adding a tween if pixel translation is higher than a given threshold could be a good idea
+/// ```
+/// // In seconds/pixel
+/// const CAMERA_SPEED: i32 = 5;
+/// // In pixels
+/// const THRESHOLD: i32 = 16;
+///
+/// if pixels_to_travel > THRESHOLD {
+///     try_add_a_tween(pixels_to_travel * CAMERA_SPEED);
+/// }
+/// ```
 fn lock_camera_on_target(
     camera: Single<(Entity, &mut Transform), With<MainCamera>>,
     target: Single<&Transform, (With<CameraTarget>, Without<MainCamera>)>,
