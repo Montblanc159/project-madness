@@ -7,7 +7,7 @@ use crate::game::{
     map::npc::{AvatarFilePath, NpcName},
 };
 
-mod helpers;
+mod utils;
 
 #[derive(Resource, Default)]
 struct DialogsFolder(Handle<LoadedFolder>);
@@ -119,7 +119,7 @@ fn run_dialog(
             && let Some(dialog_file) = dialogs_cache.dialogs.get(&file_path.0)
         {
             let mut story =
-                helpers::get_story_with_state(dialog_file, &dialog_state.0, &dialog_knot.0);
+                utils::get_story_with_state(dialog_file, &dialog_state.0, &dialog_knot.0);
 
             if let Some(choice_index) = event.choice_index {
                 story
@@ -127,7 +127,7 @@ fn run_dialog(
                     .expect("Could not set story choice");
             }
 
-            let lines = helpers::get_lines(&mut story);
+            let lines = utils::get_lines(&mut story);
 
             if let Ok(dialog_state) = story.save_state() {
                 update_entity_event.write(UpdateDialogStateEvent {
@@ -136,7 +136,7 @@ fn run_dialog(
                 });
             }
 
-            let choices = helpers::get_choices(&story);
+            let choices = utils::get_choices(&story);
 
             if lines.is_empty() && choices.is_empty() {
                 dialog_ended_event.write(DialogEndedEvent);
