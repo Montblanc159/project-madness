@@ -147,6 +147,13 @@ fn spawn_player(
                 GridCoords {
                     ..entity_instance.grid.into()
                 },
+                Transform::from_translation(
+                    bevy_ecs_ldtk::utils::grid_coords_to_translation(
+                        entity_instance.grid.into(),
+                        IVec2::splat(GRID_SIZE),
+                    )
+                    .extend(PLAYER_Z_DEPTH),
+                ),
                 Velocity {
                     ..Default::default()
                 },
