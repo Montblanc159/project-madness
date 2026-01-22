@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::game::{global::despawn_entity_on_level_change, map::zones::Zones};
+use crate::game::{
+    global::{GameState, despawn_entity_on_level_change},
+    map::zones::Zones,
+};
 
 const IDENTIFIER: &str = "WanderZone";
 
@@ -31,6 +34,7 @@ pub fn plugin(app: &mut App) {
             super::spawn_zones::<WanderZone>,
             super::cache_zones::<WanderZone>,
         )
+            .run_if(in_state(GameState::InGame))
             .chain(),
     );
 }

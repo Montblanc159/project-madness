@@ -5,8 +5,8 @@ use crate::game::map::ChangeLevel;
 /// Global game state
 #[derive(States, Default, Debug, Clone, Hash, Eq, PartialEq)]
 pub enum GameState {
-    Menu,
     #[default]
+    Menu,
     InGame,
 }
 

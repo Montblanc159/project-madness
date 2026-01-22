@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::game::map::GRID_SIZE;
+use crate::game::{global::GameState, map::GRID_SIZE};
 
 mod wall;
 
@@ -40,7 +40,8 @@ pub fn plugin(app: &mut App) {
             cache_level_bounds,
             cache_collider_locations,
             update_collider_locations,
-        ),
+        )
+            .run_if(in_state(GameState::InGame)),
     );
 }
 

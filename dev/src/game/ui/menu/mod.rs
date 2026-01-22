@@ -18,7 +18,7 @@ struct MenuContainer;
 struct MenuOption;
 
 pub fn plugin(app: &mut App) {
-    // app.add_observer(react_to_player_selection);
+    app.add_observer(react_to_player_selection);
     app.add_systems(OnEnter(GameState::Menu), (spawn_menu, add_nav_map).chain());
     app.add_systems(
         Update,
@@ -95,6 +95,7 @@ fn add_nav_map(
         options[index] = entity;
     }
 
+    directional_nav_map.clear();
     directional_nav_map.add_looping_edges(&options, CompassOctant::South);
 
     input_focus.set(options[0]);

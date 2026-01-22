@@ -3,7 +3,7 @@ use bevy_ecs_ldtk::prelude::*;
 
 use crate::game::{
     audio::music::PlaySong,
-    global::despawn_entity_on_level_change,
+    global::{GameState, despawn_entity_on_level_change},
     map::{utils, zones::Zones},
     player::Player,
 };
@@ -65,7 +65,8 @@ pub fn plugin(app: &mut App) {
             super::cache_zones::<MusicZone>,
             activate,
         )
-            .chain(),
+            .chain()
+            .run_if(in_state(GameState::InGame)),
     );
 }
 

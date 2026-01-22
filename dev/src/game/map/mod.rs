@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
+use crate::game::global::GameState;
+
 mod actionables;
 pub mod inerts;
 pub mod int_grid_objects;
@@ -30,8 +32,11 @@ pub fn plugin(app: &mut App) {
 
     app.add_message::<ChangeLevel>();
 
-    app.add_systems(Startup, map_setup);
-    app.add_systems(Update, (set_current_level_identifier, change_level));
+    app.add_systems(OnEnter(GameState::InGame), map_setup);
+    app.add_systems(
+        Update,
+        (set_current_level_identifier, change_level).run_if(in_state(GameState::InGame)),
+    );
 
     app.add_plugins(int_grid_objects::plugin);
     app.add_plugins(zones::plugin);

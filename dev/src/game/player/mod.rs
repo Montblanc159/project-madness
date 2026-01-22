@@ -7,6 +7,7 @@ use bevy_tweening::*;
 
 use crate::game::controls::{PlayerAction, PlayerInputs};
 use crate::game::dialog_system::{DialogEndedEvent, RunDialogEvent};
+use crate::game::global::GameState;
 use crate::game::physics::colliders::{Collider, LevelColliders};
 use crate::game::tick::TickDelta;
 
@@ -121,7 +122,8 @@ pub fn plugin(app: &mut App) {
             set_translate_with_grid_coords,
             update_display_action_zone,
         )
-            .chain(),
+            .chain()
+            .run_if(in_state(GameState::InGame)),
     );
 }
 

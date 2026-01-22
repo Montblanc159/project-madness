@@ -5,7 +5,7 @@ use bevy_ecs_ldtk::GridCoords;
 use crate::game::{
     audio::object_audio::PlayObjectAudio,
     dialog_system::{DialogFilePath, DialogKnot, DialogState},
-    global::despawn_entity_on_level_change,
+    global::{GameState, despawn_entity_on_level_change},
     player::Activate,
 };
 
@@ -60,7 +60,8 @@ pub fn plugin(app: &mut App) {
             super::spawn_npc::<DummyNpc>,
             super::update_npc_position::<DummyNpc>,
             activate,
-        ),
+        )
+            .run_if(in_state(GameState::InGame)),
     );
 }
 

@@ -12,6 +12,7 @@ use bevy::{
 use crate::game::{
     controls::{PlayerAction, PlayerInputs},
     dialog_system::{DialogChoice, DialogEndedEvent, DisplayCurrentDialogEvent, RunDialogEvent},
+    global::GameState,
     ui::InputSelected,
 };
 
@@ -53,7 +54,10 @@ struct CurrentSourceEntity(Option<Entity>);
 
 pub fn plugin(app: &mut App) {
     app.add_observer(set_choice_index);
-    app.add_systems(Startup, (spawn_dialog_box, spawn_dialog_cache));
+    app.add_systems(
+        OnEnter(GameState::InGame),
+        (spawn_dialog_box, spawn_dialog_cache),
+    );
     app.add_systems(
         Update,
         (
@@ -68,6 +72,7 @@ pub fn plugin(app: &mut App) {
             fetch_next_dialog_block.run_if(dialog_end_reached),
             end_dialog,
         )
+            .run_if(in_state(GameState::InGame))
             .chain(),
     );
 }
@@ -339,6 +344,7 @@ fn update_dialog_choices(
 
         dialog_choices.0.clear();
 
+        directional_nav_map.clear();
         directional_nav_map.add_looping_edges(&choices, CompassOctant::South);
 
         input_focus.set(choices[0]);

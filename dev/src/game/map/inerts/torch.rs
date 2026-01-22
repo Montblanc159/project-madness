@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_aseprite_ultra::prelude::AseSlice;
 
-use crate::game::global::despawn_entity_on_level_change;
+use crate::game::global::{GameState, despawn_entity_on_level_change};
 
 const IDENTIFIER: &str = "Torch";
 
@@ -29,6 +29,7 @@ pub fn plugin(app: &mut App) {
         (
             despawn_entity_on_level_change::<Torch>,
             super::spawn_object::<Torch>,
-        ),
+        )
+            .run_if(in_state(GameState::InGame)),
     );
 }

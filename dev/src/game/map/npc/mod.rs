@@ -8,6 +8,7 @@ use rand::prelude::*;
 
 use crate::game::{
     dialog_system::{DialogEndedEvent, DialogFilePath, DialogKnot, DialogState, RunDialogEvent},
+    global::GameState,
     map::{
         GRID_SIZE,
         zones::{Zones, wander_zones::WanderZone},
@@ -48,7 +49,10 @@ enum NpcStance {
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(dummy_npc::plugin);
-    app.add_systems(Update, (wander, talk, end_talk));
+    app.add_systems(
+        Update,
+        (wander, talk, end_talk).run_if(in_state(GameState::InGame)),
+    );
 }
 
 fn spawn_npc<T: Component + Npc>(
