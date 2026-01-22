@@ -12,6 +12,7 @@ use bevy::{
 use crate::game::{
     controls::{PlayerAction, PlayerInputs},
     dialog_system::{DialogChoice, DialogEndedEvent, DisplayCurrentDialogEvent, RunDialogEvent},
+    global::GameState,
     ui::InputSelected,
 };
 
@@ -53,7 +54,10 @@ struct CurrentSourceEntity(Option<Entity>);
 
 pub fn plugin(app: &mut App) {
     app.add_observer(set_choice_index);
-    app.add_systems(Startup, (spawn_dialog_box, spawn_dialog_cache));
+    app.add_systems(
+        OnEnter(GameState::InGame),
+        (spawn_dialog_box, spawn_dialog_cache),
+    );
     app.add_systems(
         Update,
         (
@@ -68,6 +72,7 @@ pub fn plugin(app: &mut App) {
             fetch_next_dialog_block.run_if(dialog_end_reached),
             end_dialog,
         )
+            .run_if(in_state(GameState::InGame))
             .chain(),
     );
 }
@@ -285,7 +290,6 @@ fn fetch_next_dialog_block(
     {
         let mut choice_index = choice_index.into_inner();
 
-        println!("Fetching next dialog block");
         dialog_event.write(RunDialogEvent {
             source_entity,
             choice_index: choice_index.0,
@@ -361,16 +365,11 @@ fn highlight_focused_element(
 
 fn set_choice_index(
     event: On<InputSelected>,
-    mut commands: Commands,
-    choices: Query<(Entity, &DialogChoiceIndex), With<DialogChoiceUi>>,
+    choices: Query<&DialogChoiceIndex, With<DialogChoiceUi>>,
     current_choice_index: Single<&mut CurrentDialogChoiceIndex>,
 ) {
-    if let Ok((_, choice_index)) = choices.get(event.entity) {
+    if let Ok(choice_index) = choices.get(event.entity) {
         current_choice_index.into_inner().0 = Some(choice_index.0);
-    }
-
-    for (entity, _) in choices {
-        commands.entity(entity).despawn();
     }
 }
 

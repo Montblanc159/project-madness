@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
 use crate::game::{
-    global::despawn_entity_on_level_change,
+    global::{GameState, despawn_entity_on_level_change},
     map::{ChangeLevel, CurrentLevelInfos, utils, zones::Zones},
     player::{Player, Teleported},
 };
@@ -58,6 +58,7 @@ pub fn plugin(app: &mut App) {
             activate,
             remove_not_teleportable,
         )
+            .run_if(in_state(GameState::InGame))
             .chain(),
     );
 }

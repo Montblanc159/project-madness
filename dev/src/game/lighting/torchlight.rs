@@ -6,6 +6,7 @@ use bevy_tweening::{Lens, Tween, TweenAnim};
 use rand::prelude::*;
 
 use crate::game::{
+    global::GameState,
     map::{GRID_SIZE, inerts::torch::Torch},
     tick::{MainTick, TickDelta},
 };
@@ -28,7 +29,10 @@ impl super::LightParameters for Torch {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (super::add_lights::<Torch>, flicker));
+    app.add_systems(
+        Update,
+        (super::add_lights::<Torch>, flicker).run_if(in_state(GameState::InGame)),
+    );
 }
 
 struct PointLight2dRangeLens {

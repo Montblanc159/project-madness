@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::EntityInstance;
 
 use crate::game::{
-    global::despawn_entity_on_level_change,
+    global::{GameState, despawn_entity_on_level_change},
     map::{GRID_SIZE, utils},
 };
 
@@ -24,7 +24,8 @@ pub fn plugin(app: &mut App) {
             despawn_entity_on_level_change::<DummyAction>,
             spawn_entity_instance,
             super::activate::<DummyAction>,
-        ),
+        )
+            .run_if(in_state(GameState::InGame)),
     );
 }
 
