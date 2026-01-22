@@ -12,6 +12,7 @@ use bevy::{
 use crate::game::controls::{PlayerAction, PlayerInputs};
 
 pub mod dialogs;
+mod menu;
 
 pub const DEFAULT_FONT_SIZE: f32 = 45.;
 pub const DEFAULT_PADDING: u8 = 25;
@@ -26,6 +27,7 @@ pub fn plugin(app: &mut App) {
         InputDispatchPlugin,
         DirectionalNavigationPlugin,
         dialogs::plugin,
+        menu::plugin,
     ));
     app.insert_resource(InputFocusVisible(true));
     app.add_systems(Update, (navigate, interact_with_focused_input));

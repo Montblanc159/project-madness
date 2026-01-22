@@ -14,11 +14,9 @@ mod third_party;
 mod tick;
 mod ui;
 
-// Game
-// ================================================================
-
 pub fn plugin(app: &mut App) {
     app.add_plugins((
+        global::plugin,
         third_party::plugin,
         lighting::plugin,
         audio::plugin,
@@ -31,6 +29,5 @@ pub fn plugin(app: &mut App) {
         tick::plugin,
         controls::plugin,
         player::plugin,
-        // global::plugin,
     ));
 }
