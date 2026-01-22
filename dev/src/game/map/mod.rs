@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::game::global::GameState;
+use crate::game::global::{
+    GameState,
+    loader::{LoadingData, LoadingState},
+};
 
 mod actionables;
 pub mod inerts;
@@ -35,7 +38,9 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::InGame), map_setup);
     app.add_systems(
         Update,
-        (set_current_level_identifier, change_level).run_if(in_state(GameState::InGame)),
+        (set_current_level_identifier, change_level)
+            .run_if(in_state(GameState::InGame))
+            .run_if(in_state(LoadingState::Done)),
     );
 
     app.add_plugins(int_grid_objects::plugin);
@@ -54,9 +59,17 @@ pub fn change_level(
     }
 }
 
-fn map_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn map_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut loading_data: ResMut<LoadingData>,
+) {
+    let map = asset_server.load("textures/map/tilemap.ldtk");
+
+    loading_data.loading_assets.push(map.clone().into());
+
     commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("textures/map/tilemap.ldtk").into(),
+        ldtk_handle: map.into(),
         ..Default::default()
     });
 }
@@ -70,13 +83,13 @@ fn set_current_level_identifier(
 ) {
     let ldtk_project_entity = ldtk_project_entity.into_inner();
 
-    let ldtk_project = ldtk_project_assets.get(ldtk_project_entity).unwrap();
-    let level = ldtk_project
-        .find_raw_level_by_level_selection(&level_selection)
-        .unwrap();
-
     for level_event in level_messages.read() {
         if let LevelEvent::Spawned(_) = level_event {
+            let ldtk_project = ldtk_project_assets.get(ldtk_project_entity).unwrap();
+            let level = ldtk_project
+                .find_raw_level_by_level_selection(&level_selection)
+                .unwrap();
+
             *level_infos = CurrentLevelInfos {
                 coming_from: Some(level_infos.identifier.clone()),
                 identifier: level.identifier.clone(),

@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 use crate::game::map::ChangeLevel;
 
+pub mod loader;
+
 /// Global game state
 #[derive(States, Default, Debug, Clone, Hash, Eq, PartialEq)]
 pub enum GameState {
@@ -13,16 +15,8 @@ pub enum GameState {
 #[derive(Message)]
 pub struct StartGame;
 
-// #[derive(States, Default, Debug, Clone, Hash, Eq, PartialEq)]
-// pub enum InGameState {
-//     #[default]
-//     Playing,
-//     Menu,
-//     Paused,
-//     Loading,
-// }
-
 pub fn plugin(app: &mut App) {
+    app.add_plugins(loader::plugin);
     app.init_state::<GameState>();
     app.add_message::<StartGame>();
     app.add_systems(Update, start_game.run_if(not(in_state(GameState::InGame))));
