@@ -365,16 +365,11 @@ fn highlight_focused_element(
 
 fn set_choice_index(
     event: On<InputSelected>,
-    mut commands: Commands,
-    choices: Query<(Entity, &DialogChoiceIndex), With<DialogChoiceUi>>,
+    choices: Query<&DialogChoiceIndex, With<DialogChoiceUi>>,
     current_choice_index: Single<&mut CurrentDialogChoiceIndex>,
 ) {
-    if let Ok((_, choice_index)) = choices.get(event.entity) {
+    if let Ok(choice_index) = choices.get(event.entity) {
         current_choice_index.into_inner().0 = Some(choice_index.0);
-    }
-
-    for (entity, _) in choices {
-        commands.entity(entity).despawn();
     }
 }
 

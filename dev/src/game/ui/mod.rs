@@ -26,8 +26,8 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((
         InputDispatchPlugin,
         DirectionalNavigationPlugin,
-        dialogs::plugin,
         menu::plugin,
+        dialogs::plugin,
     ));
     app.insert_resource(InputFocusVisible(true));
     app.add_systems(Update, (navigate, interact_with_focused_input));

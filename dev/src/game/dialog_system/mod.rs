@@ -4,7 +4,7 @@ use bevy::{asset::LoadedFolder, prelude::*};
 
 use crate::game::{
     custom_asset_types::ink_json::InkJson,
-    global::GameState,
+    global::{GameState, loader::LoadingData},
     map::npc::{AvatarFilePath, NpcName},
 };
 
@@ -72,8 +72,16 @@ pub fn plugin(app: &mut App) {
     );
 }
 
-fn load_dialog_folder(mut commands: Commands, asset_server: ResMut<AssetServer>) {
-    commands.insert_resource(DialogsFolder(asset_server.load_folder("dialogs")));
+fn load_dialog_folder(
+    mut commands: Commands,
+    asset_server: ResMut<AssetServer>,
+    mut loading_data: ResMut<LoadingData>,
+) {
+    let folder = asset_server.load_folder("dialogs");
+
+    loading_data.loading_assets.push(folder.clone().into());
+
+    commands.insert_resource(DialogsFolder(folder));
 }
 
 fn cache_dialogs(
