@@ -290,7 +290,6 @@ fn fetch_next_dialog_block(
     {
         let mut choice_index = choice_index.into_inner();
 
-        println!("Fetching next dialog block");
         dialog_event.write(RunDialogEvent {
             source_entity,
             choice_index: choice_index.0,
@@ -344,7 +343,6 @@ fn update_dialog_choices(
 
         dialog_choices.0.clear();
 
-        directional_nav_map.clear();
         directional_nav_map.add_looping_edges(&choices, CompassOctant::South);
 
         input_focus.set(choices[0]);

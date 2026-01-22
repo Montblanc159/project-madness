@@ -95,7 +95,6 @@ fn add_nav_map(
         options[index] = entity;
     }
 
-    directional_nav_map.clear();
     directional_nav_map.add_looping_edges(&options, CompassOctant::South);
 
     input_focus.set(options[0]);
