@@ -1,0 +1,6 @@
+@use "colors";
+@use "sass:color";
+
+a:hover {
+    color: color.lighten(colors.$highlight-color, 15);
+}

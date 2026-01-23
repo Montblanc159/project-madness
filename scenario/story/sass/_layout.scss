@@ -1,0 +1,19 @@
+@use "colors";
+
+$default-margin: 12.5px;
+$default-padding: 12.5px;
+
+body {
+    background-color: colors.$secondary-color;
+}
+
+main {
+    margin: $default-margin auto;
+    max-width: 875px;
+    padding: 0 $default-padding;
+}
+
+nav {
+    margin: calc($default-margin / 2) auto;
+    width: fit-content;
+}

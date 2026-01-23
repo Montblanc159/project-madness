@@ -1,0 +1,23 @@
+@font-face {
+    font-family: mainFont; /* set name */
+    src: url(CourierPrime-Regular.ttf); /* url of the font */
+}
+
+@font-face {
+    font-family: mainFont; /* set name */
+    src: url(CourierPrime-Italic.ttf); /* url of the font */
+    font-style: italic;
+}
+
+@font-face {
+    font-family: mainFont;
+    src: url(CourierPrime-Bold.ttf);
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: mainFont;
+    src: url(CourierPrime-BoldItalic.ttf);
+    font-weight: bold;
+    font-style: italic;
+}

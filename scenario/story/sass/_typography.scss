@@ -1,0 +1,24 @@
+@use "colors";
+
+$default-font-size: 1.5rem;
+
+* {
+    font-family: mainFont;
+    color: colors.$main-color;
+}
+
+p {
+    font-size: $default-font-size;
+}
+
+h1 {
+    font-size: calc($default-font-size + 2rem);
+}
+
+a {
+    color: colors.$highlight-color;
+}
+
+::selection {
+    background-color: colors.$highlight-color;
+}
