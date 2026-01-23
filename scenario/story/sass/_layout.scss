@@ -3,6 +3,10 @@
 $default-margin: 12.5px;
 $default-padding: 12.5px;
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: colors.$secondary-color;
 }
@@ -16,4 +20,8 @@ main {
 nav {
     margin: calc($default-margin / 2) auto;
     width: fit-content;
+}
+
+ul {
+    padding: 0 $default-padding;
 }

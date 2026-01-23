@@ -1,4 +1,5 @@
 @use "colors";
+@use "layout";
 
 $default-font-size: 1.5rem;
 
@@ -21,4 +22,11 @@ a {
 
 ::selection {
     background-color: colors.$highlight-color;
+}
+
+li {
+    list-style-type: "❥";
+    padding-inline-start: 1ch;
+    margin: layout.$default-margin 0;
+    font-size: $default-font-size;
 }
