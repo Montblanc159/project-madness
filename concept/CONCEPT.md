@@ -48,6 +48,8 @@ Vous, détective privé, descendant d'une longue lignée de personnes aux vies t
 
 - La montagne est un rejeton de [Yog Sothoth](https://fr.wikipedia.org/wiki/Yog-Sothoth) ou d'[Azathoth](https://fr.wikipedia.org/wiki/Azathoth)
 
+- On suit un premier personnage (Gaidheal) avec un narrateur et la lecture de son carnet -> au tiers de l'histoire personnage meurt, on se rend compte que le narrateur est un proche qui a retrouvé son carnet sur son lieu de décés (la montagne ?). Le personnage redescend de la montagne et se fait dézinguer dans le village -> un troisième personnage rentre en jeu. -> permet de changer de gameplay de façon organique
+
 ## Mario's brainfart
 
 Quels sont les effets de la corruption sur les survivants et leurs descendants 2000 ans plus tard ? Anomalies physiques ou maladies mentales ? Peut-être que la corruption provoque l’apparition de “dons” mais ces dons sont à double tranchant ex:
