@@ -5,6 +5,7 @@ use bevy::prelude::*;
 const DEFAULT_BPM: f32 = 120.;
 const DEFAULT_BEATS_PER_MEASURE: f32 = 4.;
 const DEFAULT_NOTES_PER_MEASURE: f32 = 4.;
+const MAX_COUNTER_VALUE: u8 = 120;
 
 #[derive(Resource)]
 pub struct MainTick {
@@ -84,7 +85,7 @@ fn tick_timer(time: Res<Time>, mut config: ResMut<MainTick>) {
 
 fn count_timer_repeats(main_tick: Res<MainTick>, mut counter: ResMut<MainTickCounter>) {
     if main_tick.timer.just_finished() {
-        if counter.value == 120 {
+        if counter.value == MAX_COUNTER_VALUE {
             counter.value = 1;
         } else {
             counter.value += 1;
