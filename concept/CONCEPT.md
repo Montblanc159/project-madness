@@ -28,6 +28,20 @@ Vous, détective privé, descendant d'une longue lignée de personnes aux vies t
 
 ## Guillaume's Brainpuke
 
+- ville :
+  - enez:
+    -  Edig
+    - Houad
+    - Arzh
+    - gerveur
+    - groe
+    - sun
+    - eusa
+    - vazh
+    - vriad
+  - inizi glenan
+  - enezeg molenez
+
 - Le cataclysme se transforme en mythe. À la manière de Dune, une histoire transformée par les millénaires à laquelle plus personne ne croit vraiment. Et pourtant la montagne en serait une relique intact. Relique qui, avant la naissance récente de l'alpinisme, n'intéressait plus personne depuis des siècles.
 
 - "La montagne... Ça n'est pas une montagne... C'est un organisme. Un organisme qui se défend d'un virus qui tente de l'envahir."
@@ -49,6 +63,15 @@ Vous, détective privé, descendant d'une longue lignée de personnes aux vies t
 - La montagne est un rejeton de [Yog Sothoth](https://fr.wikipedia.org/wiki/Yog-Sothoth) ou d'[Azathoth](https://fr.wikipedia.org/wiki/Azathoth)
 
 - On suit un premier personnage (Gaidheal) avec un narrateur et la lecture de son carnet -> au tiers de l'histoire personnage meurt, on se rend compte que le narrateur est un proche qui a retrouvé son carnet sur son lieu de décés (la montagne ?). Le personnage redescend de la montagne et se fait dézinguer dans le village -> un troisième personnage rentre en jeu. -> permet de changer de gameplay de façon organique
+
+- On suit trois personnages en simultané, qui se croisent lors de l'histoire. Le choix des uns influencent l'histoire des autres, à la manière d'un choral movie. Guidheal la détective affutée et qui sait se battre. Un(e) pêcheur(se), un(e) local(e) connaissant son environnement et qui sait bricoler intégré(e) à la communauté. Un(e) alpinist(e), force brute, fonceur(se), avec une forte capacité de survie en milieu hostile, mais qui est détesté(e) par tous les locaux.
+
+- Y a une histoire de cataclysme qui réduirait le village à néant (un peu à la manière de la cité d'ys, ou l'atlantide).
+On sent les prémices de ce cataclysme, d'où des évènements étranges qui ont lieu. Et on aborde l'histoire sous différents angles avec nos trois personnages.
+L'idée serait que l'on découvre au fur et à mesure de ce dont il s'agit. Il faudrait que pendant tout le récit, on ait l'impression que les soucis viennent d'un conflit en tre modernité et ancien monde. Alors qu'en réalité, il s'agit d'un "morceau"/"éclat" de grand ancien qui se révéillerait. Sans que les humains en soit la cause, ni qu'ils y puissent quelque chose.
+Et de manière méta, je ne voudrais pas que ce soit nihiliste, au contraire. J'aimerais qu'on fasse ressortir le fait qu'à la fin, lorsque tout part en vrille, ceux qui s'en sortent le mieux, ce sont ceux qui s'entraident, que ce qui est signifiant et qui va dans le sens du progrès, ça n'est pas le conflit ni l'imposition d'une pensée unique, mais l'écoute, la discussion et le compromis.
+
+- Nom du village : Keris (Cité d'ys) -
 
 ## Mario's brainfart
 
