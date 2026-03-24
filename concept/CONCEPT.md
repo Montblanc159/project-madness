@@ -66,10 +66,18 @@ Vous, détective privé, descendant d'une longue lignée de personnes aux vies t
 
 - On suit trois personnages en simultané, qui se croisent lors de l'histoire. Le choix des uns influencent l'histoire des autres, à la manière d'un choral movie. Guidheal la détective affutée et qui sait se battre. Un(e) pêcheur(se), un(e) local(e) connaissant son environnement et qui sait bricoler intégré(e) à la communauté. Un(e) alpinist(e), force brute, fonceur(se), avec une forte capacité de survie en milieu hostile, mais qui est détesté(e) par tous les locaux.
 
-- Y a une histoire de cataclysme qui réduirait le village à néant (un peu à la manière de la cité d'ys, ou l'atlantide).
+- Un cataclysme qui réduirait le village à néant (un peu à la manière de la cité d'ys, ou l'atlantide).
 On sent les prémices de ce cataclysme, d'où des évènements étranges qui ont lieu. Et on aborde l'histoire sous différents angles avec nos trois personnages.
 L'idée serait que l'on découvre au fur et à mesure de ce dont il s'agit. Il faudrait que pendant tout le récit, on ait l'impression que les soucis viennent d'un conflit en tre modernité et ancien monde. Alors qu'en réalité, il s'agit d'un "morceau"/"éclat" de grand ancien qui se révéillerait. Sans que les humains en soit la cause, ni qu'ils y puissent quelque chose.
 Et de manière méta, je ne voudrais pas que ce soit nihiliste, au contraire. J'aimerais qu'on fasse ressortir le fait qu'à la fin, lorsque tout part en vrille, ceux qui s'en sortent le mieux, ce sont ceux qui s'entraident, que ce qui est signifiant et qui va dans le sens du progrès, ça n'est pas le conflit ni l'imposition d'une pensée unique, mais l'écoute, la discussion et le compromis.
+
+- Le grand ancien ou "éclat de grand ancien" matérialiserait une force de l'univers qui n'a aucun but. Comme une règle fondamentale de la physique (la gravité par exemple), que les humains ne peuvent qu'observer et qui touchent aux limites de notre compréhension. Ce serait l'élèment perturbateur qui viendrait complètement chambouler l'importance des arcs narratifs les uns par rapport aux autres (le conflit, l'enquête, les évènements étranges, les histoires personnelles)
+
+- réponse à Mario sur oppositions groupe : Les pêcheurs seraient le groupe 1 et le groupe 2 serait les alpinistes des "modernes" venu conquérir la cime. Les groupes auraient peu de contact en dehors de cette situation de "conquête".
+Pour expliquer le peu de contact entre les zones, peut-être que chaque région serait auto-suffisante et n'aurait pas besoin de commercer ou d'échanger avec les autres.
+Peut-être que l'autosuffisance a pu être apporté par le cataclysme originel qui a transformé les sols/océans en zone ultra fertiles/énergifère. Mais effectivement peut-être qu'avant cette transformation, l'humain a vécu dans une errance monstrueuse, où l'espoir était si faible que le cannibalisme aurait pu devenir une forme de nutrition.
+Et on pourrait facilement expliquer que les zones/régions prennent des directions d'évolution totalement différentes.
+Et que certaines zones aient meilleure réputation que d'autres
 
 - Nom du village : Keris (Cité d'ys) -
 
@@ -103,3 +111,15 @@ https://moviepire.net/movie/516632
 J’aime bien l’idée qu’il puisse absorber les caractéristiques des corps dont il se nourrit.
 Quand son don est actif, il souffre de visions des derniers instants du mort, il ressent tout comme s' il y était.
 La conscience du mort et ces souvenirs ne le quitte vraiment jamais… S’il se contente demanger une bouché, il ne remarquera rien sur le long terme mais si il devait manger une quantité important ( à définir) il pourrait passer le reste de ces jours accompagner d’une petite voix dans la tête (comme un passager clandestin …)
+
+Moi je n'avais pas encore de vision bien définie de ce que le jeu racontera au fond. Mais ça se dessine un peu avec ce que tu viens de me dire.
+ Je vois bien le jeu mettre en opposition deux visions du monde suite au cataclysme,
+1/ ceux qui sont retourné à la nature , à la vie en petite communauté pratiquement autonome mais très isolé et en retard sur bcp de point.
+2/ ceux qui tente de ramener notre civilisation à sa "grandeur" pré-cataclysme.
+
+Le groupe 1 à peur du groupe 2 car ils voient l'histoire se répéter, "ils vont entraîner la fin du monde et cette fois pour de bon".
+La civilisation ok mais pas si on doit se retrouver en bas de l'échelle à souffrir pour en enrichir d'autres.
+
+Le groupe 2 voit en 1 ce qu'il y eut de pire dans l'histoire récente. Non pas le cataclysme mais les décennies qui ont suivis. Les famines les épidémies, les sectes, les guerres tribales ...
+ Peut-être encore des habitudes hérité des années terrible qui ont suivi le cataclysme ( canabalisme? sacrifice humain?)
+Le groupe 2 accueille avec enthousiasme le future et le progrès scientifiques tout en fermant les yeux sur tout ce que cela engendre  comme inégalités...
