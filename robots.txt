@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+Allow: /
+Sitemap: https://montblanc159.github.io/project-madness/sitemap.xml
