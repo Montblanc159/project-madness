@@ -1,5 +1,7 @@
 # Nyarlathotep, « le chaos rampant »
 
+Mythologie lovecraftienne
+
 ## Description
 
 Nyarlathotep, surnommé « le Chaos Rampant », est à la fois le messager, le cœur et l'âme des Autres Dieux (Other Gods).

@@ -1,4 +1,6 @@
-LE WENDIGO
+# LE WENDIGO
+
+Mythologie algonquienne
 
 Le wendigo (pluriel : wendigowak / wendigos[1]) est une créature surnaturelle, maléfique et anthropophage, issue de la mythologie des Premières Nations algonquiennes du Canada, qui s'est étendue dans tout le folklore d'Amérique du Nord.
 Cette légende est partagée par plusieurs nations autochtones d’Amérique et peut désigner la transformation physique d'un humain après la consommation de viande humaine comme une possession spirituelle. Le wendigo a aussi renforcé le tabou autour de la pratique du cannibalisme chez ces peuples. Les wendigowak (wendigos) vivent dans les profondeurs de la forêt et apparaissent dans des contes où le surnaturel côtoie des choses inhumaines et atroces.
